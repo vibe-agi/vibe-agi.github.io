@@ -33,6 +33,13 @@ function matches(html, expression) {
   return [...html.matchAll(expression)].map((match) => match[1]);
 }
 
+function jsonLd(html) {
+  return matches(
+    html,
+    /<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g,
+  ).map((value) => JSON.parse(value));
+}
+
 function localTarget(reference) {
   const url = new URL(reference, `${siteOrigin}/`);
   if (url.origin !== siteOrigin) return undefined;
@@ -59,15 +66,133 @@ test("every page has complete language, metadata, and document landmarks", async
     assert.match(html, new RegExp(`<html lang="${expectedLanguage}"`), relativePath);
     assert.match(html, /<title>[^<]+<\/title>/, relativePath);
     assert.match(html, /<meta name="description" content="[^"]+">/, relativePath);
+    assert.match(html, /<link rel="sitemap" href="\/sitemap-index\.xml">/, relativePath);
     if (relativePath === "404.html") {
       assert.match(html, /<meta name="robots" content="noindex, nofollow">/, relativePath);
       assert.doesNotMatch(html, /<link rel="canonical"/, relativePath);
     } else {
       assert.match(html, /<link rel="canonical" href="https:\/\/vibe-agi\.github\.io\/[^"]*">/, relativePath);
+      assert.match(
+        html,
+        /<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">/,
+        relativePath,
+      );
     }
     assert.equal((html.match(/<main\b/g) ?? []).length, 1, relativePath);
     assert.equal((html.match(/<h1\b/g) ?? []).length, 1, relativePath);
     assert.doesNotMatch(html, /undefined|\[object Object\]/, relativePath);
+  }
+});
+
+test("language alternates form reciprocal canonical clusters", async () => {
+  const pairs = [
+    [
+      "index.html",
+      "zh/index.html",
+      "https://vibe-agi.github.io/",
+      "https://vibe-agi.github.io/zh/",
+    ],
+    [
+      "products/vibermate/index.html",
+      "zh/products/vibermate/index.html",
+      "https://vibe-agi.github.io/products/vibermate/",
+      "https://vibe-agi.github.io/zh/products/vibermate/",
+    ],
+    [
+      "products/hideout/index.html",
+      "zh/products/hideout/index.html",
+      "https://vibe-agi.github.io/products/hideout/",
+      "https://vibe-agi.github.io/zh/products/hideout/",
+    ],
+  ];
+
+  for (const [englishPath, chinesePath, englishUrl, chineseUrl] of pairs) {
+    const [english, chinese] = await Promise.all([
+      read(englishPath),
+      read(chinesePath),
+    ]);
+    for (const html of [english, chinese]) {
+      assert.ok(html.includes('hreflang="en" href="' + englishUrl + '"'));
+      assert.ok(html.includes('hreflang="zh-CN" href="' + chineseUrl + '"'));
+      assert.ok(html.includes('hreflang="x-default" href="' + englishUrl + '"'));
+    }
+  }
+});
+
+test("the generated sitemap exposes every bilingual URL and its alternate", async () => {
+  const sitemap = await read("sitemap-0.xml");
+  const pairs = [
+    ["https://vibe-agi.github.io/", "https://vibe-agi.github.io/zh/"],
+    [
+      "https://vibe-agi.github.io/products/vibermate/",
+      "https://vibe-agi.github.io/zh/products/vibermate/",
+    ],
+    [
+      "https://vibe-agi.github.io/products/hideout/",
+      "https://vibe-agi.github.io/zh/products/hideout/",
+    ],
+  ];
+
+  assert.match(sitemap, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
+  assert.equal((sitemap.match(/<url>/g) ?? []).length, 6);
+  assert.equal((sitemap.match(/<xhtml:link\b/g) ?? []).length, 12);
+  for (const [englishUrl, chineseUrl] of pairs) {
+    assert.ok(sitemap.includes(`<loc>${englishUrl}</loc>`));
+    assert.ok(sitemap.includes(`<loc>${chineseUrl}</loc>`));
+    assert.ok(sitemap.includes(`hreflang="en" href="${englishUrl}"`));
+    assert.ok(sitemap.includes(`hreflang="zh-CN" href="${chineseUrl}"`));
+  }
+});
+
+test("search engines receive truthful site, software, and breadcrumb data", async () => {
+  const home = await read("index.html");
+  const [homeData] = jsonLd(home);
+  assert.ok(homeData);
+  const homeTypes = new Set(
+    homeData["@graph"].map((entry) => entry["@type"]),
+  );
+  assert.deepEqual(homeTypes, new Set(["Organization", "WebSite"]));
+
+  for (const [relativePath, name, version, screenshotCount] of [
+    ["products/vibermate/index.html", "ViberMate", "0.1.0", 5],
+    ["products/hideout/index.html", "Hideout", "0.1.0-alpha.3", 0],
+  ]) {
+    const html = await read(relativePath);
+    const [data] = jsonLd(html);
+    assert.ok(data, relativePath);
+    const software = data["@graph"].find(
+      (entry) => entry["@type"] === "SoftwareApplication",
+    );
+    const breadcrumb = data["@graph"].find(
+      (entry) => entry["@type"] === "BreadcrumbList",
+    );
+    assert.equal(software.name, name);
+    assert.equal(software.softwareVersion, version);
+    assert.equal(software.offers.price, "0");
+    assert.equal(software.offers.priceCurrency, "USD");
+    assert.equal(software.isAccessibleForFree, true);
+    assert.equal(software.screenshot?.length ?? 0, screenshotCount);
+    assert.equal(breadcrumb.itemListElement.at(-1).name, name);
+    assert.doesNotMatch(JSON.stringify(data), /aggregateRating|reviewCount/);
+  }
+});
+
+test("ViberMate pages expose a crawlable large social preview", async () => {
+  for (const relativePath of [
+    "products/vibermate/index.html",
+    "zh/products/vibermate/index.html",
+  ]) {
+    const html = await read(relativePath);
+    assert.match(
+      html,
+      /<meta property="og:image" content="https:\/\/vibe-agi\.github\.io\/images\/vibermate\/capture-timeline\.png">/,
+    );
+    assert.match(html, /<meta property="og:image:width" content="4018">/);
+    assert.match(html, /<meta property="og:image:height" content="2244">/);
+    assert.match(
+      html,
+      /<meta name="twitter:card" content="summary_large_image">/,
+    );
   }
 });
 

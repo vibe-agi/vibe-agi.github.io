@@ -27,7 +27,74 @@ const alternateHref = productHref(product, alternateLocale);
 const currentIndex = products.findIndex((entry) => entry.slug === product.slug);
 const nextProduct = products[(currentIndex + 1) % products.length];
 const home = isChinese ? "/zh/" : "/";
-const title = `${product.name} · ${product.headline[locale]} · Vibe AGI`;
+const title = product.slug === "vibermate"
+  ? isChinese
+    ? "ViberMate — macOS 上的 Claude Code 与 Codex 流量控制工具 | Vibe AGI"
+    : "ViberMate — Traffic control for Claude Code and Codex on macOS | Vibe AGI"
+  : isChinese
+    ? "Hideout — macOS 上的 AI Agent 本地虚拟机沙箱 | Vibe AGI"
+    : "Hideout — Local VM sandbox for AI agents on macOS | Vibe AGI";
+const siteUrl = new URL("/", Astro.site).href;
+const pageUrl = new URL(productHref(product, locale), Astro.site).href;
+const organizationId = `${siteUrl}#organization`;
+const leadScreenshot = product.screenshots?.[0];
+const socialImage = leadScreenshot
+  ? {
+      src: leadScreenshot.src,
+      alt: leadScreenshot.alt[locale],
+      width: leadScreenshot.width,
+      height: leadScreenshot.height,
+    }
+  : undefined;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${pageUrl}#software`,
+      name: product.name,
+      url: pageUrl,
+      description: product.summary[locale],
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: product.platform.en,
+      softwareVersion: product.version,
+      isAccessibleForFree: true,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        url: product.release,
+      },
+      publisher: { "@id": organizationId },
+      sameAs: [product.repository, product.release],
+      ...(product.screenshots
+        ? {
+            image: new URL(product.screenshots[0].src, Astro.site).href,
+            screenshot: product.screenshots.map((entry) =>
+              new URL(entry.src, Astro.site).href),
+          }
+        : {}),
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${pageUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Vibe AGI",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: product.name,
+          item: pageUrl,
+        },
+      ],
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -37,6 +104,8 @@ const title = `${product.name} · ${product.headline[locale]} · Vibe AGI`;
   title={title}
   description={product.summary[locale]}
   pageClass={`product-page product-page--${product.slug}`}
+  socialImage={socialImage}
+  structuredData={structuredData}
 >
   <SiteHeader locale={locale} alternateHref={alternateHref} />
   <main id="content" class:list={[`tone-${product.tone}`]}>

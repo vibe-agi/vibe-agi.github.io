@@ -31,6 +31,7 @@ export interface Product {
   tone: ProductTone;
   role: LocalizedText;
   status: LocalizedText;
+  version: string;
   headline: LocalizedText;
   summary: LocalizedText;
   boundary: LocalizedText;
@@ -56,6 +57,7 @@ const productCatalog: readonly Product[] = [
       "编程 Agent 的流量运行时",
     ),
     status: localized("macOS preview · v0.1.0", "macOS 预览版 · v0.1.0"),
+    version: "0.1.0",
     headline: localized(
       "See every turn. Choose every route.",
       "看清每个 Turn，决定每条去向。",
@@ -208,6 +210,7 @@ const productCatalog: readonly Product[] = [
       "supervised alpha · v0.1.0-alpha.3",
       "监督式 Alpha · v0.1.0-alpha.3",
     ),
+    version: "0.1.0-alpha.3",
     headline: localized(
       "Give tools a project. Not your whole Mac.",
       "把项目交给工具，而不是整台 Mac。",

@@ -4,5 +4,15 @@ import sitemap from "@astrojs/sitemap";
 export default defineConfig({
   site: "https://vibe-agi.github.io",
   trailingSlash: "always",
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      i18n: {
+        defaultLocale: "en",
+        locales: {
+          en: "en",
+          zh: "zh-CN",
+        },
+      },
+    }),
+  ],
 });

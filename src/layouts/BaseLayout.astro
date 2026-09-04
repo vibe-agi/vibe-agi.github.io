@@ -6,6 +6,13 @@ import "../styles/global.css";
 
 import type { Locale } from "../data/products";
 
+interface SocialImage {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
 interface Props {
   locale: Locale;
   title: string;
@@ -14,6 +21,8 @@ interface Props {
   alternateLocale: Locale;
   pageClass?: string;
   indexable?: boolean;
+  socialImage?: SocialImage;
+  structuredData?: Record<string, unknown>;
 }
 
 const {
@@ -24,19 +33,18 @@ const {
   alternateLocale,
   pageClass = "",
   indexable = true,
+  socialImage,
+  structuredData,
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const alternate = new URL(alternateHref, Astro.site);
 const localeTag = locale === "zh" ? "zh-CN" : "en";
 const alternateTag = alternateLocale === "zh" ? "zh-CN" : "en";
 const socialLocale = locale === "zh" ? "zh_CN" : "en_US";
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Vibe AGI",
-  url: "https://vibe-agi.github.io",
-  sameAs: ["https://github.com/vibe-agi"],
-};
+const alternateSocialLocale = locale === "zh" ? "en_US" : "zh_CN";
+const socialImageUrl = socialImage
+  ? new URL(socialImage.src, Astro.site)
+  : undefined;
 ---
 
 <!doctype html>
@@ -49,6 +57,7 @@ const organizationSchema = {
     <meta name="color-scheme" content="light" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     {
       indexable ? (
         <>
@@ -61,17 +70,31 @@ const organizationSchema = {
         <meta name="robots" content="noindex, nofollow" />
       )
     }
+    {indexable && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Vibe AGI" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {indexable && <meta property="og:url" content={canonical} />}
     <meta property="og:locale" content={socialLocale} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:locale:alternate" content={alternateSocialLocale} />
+    {
+      socialImage && socialImageUrl && (
+        <>
+          <meta property="og:image" content={socialImageUrl} />
+          <meta property="og:image:alt" content={socialImage.alt} />
+          <meta property="og:image:width" content={String(socialImage.width)} />
+          <meta property="og:image:height" content={String(socialImage.height)} />
+          <meta name="twitter:image" content={socialImageUrl} />
+          <meta name="twitter:image:alt" content={socialImage.alt} />
+        </>
+      )
+    }
+    <meta name="twitter:card" content={socialImage ? "summary_large_image" : "summary"} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <title>{title}</title>
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+    {structuredData && <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
   </head>
   <body class={pageClass}>
     <slot />

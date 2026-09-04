@@ -16,9 +16,34 @@ const text = siteCopy[locale];
 const isChinese = locale === "zh";
 const alternateHref = isChinese ? "/" : "/zh/";
 const title = isChinese
-  ? "Vibe AGI · 人与 Agent 的开放基础设施"
-  : "Vibe AGI · Open infrastructure for humans and agents";
+  ? "Vibe AGI — 面向 AI 编程 Agent 的本地优先工具"
+  : "Vibe AGI — Local-first tools for AI coding agents";
 const description = text.heroBody;
+const siteUrl = new URL("/", Astro.site).href;
+const organizationId = `${siteUrl}#organization`;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: "Vibe AGI",
+      url: siteUrl,
+      description: siteCopy.en.heroBody,
+      sameAs: ["https://github.com/vibe-agi"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}#website`,
+      url: siteUrl,
+      name: "Vibe AGI",
+      alternateName: "Vibe AGI Open Infrastructure",
+      description: siteCopy.en.heroBody,
+      inLanguage: ["en", "zh-CN"],
+      publisher: { "@id": organizationId },
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -28,6 +53,7 @@ const description = text.heroBody;
   title={title}
   description={description}
   pageClass="home-page"
+  structuredData={structuredData}
 >
   <SiteHeader locale={locale} alternateHref={alternateHref} />
   <main id="content">
