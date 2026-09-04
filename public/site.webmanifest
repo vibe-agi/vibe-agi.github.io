@@ -4,8 +4,8 @@
   "description": "Local-first infrastructure for humans and AI agents.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e9f0ee",
-  "theme_color": "#102229",
+  "background_color": "#eeeee5",
+  "theme_color": "#0b1813",
   "icons": [
     {
       "src": "/favicon.svg",

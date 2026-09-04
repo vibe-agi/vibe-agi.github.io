@@ -1,5 +1,4 @@
 ---
-import BrandMark from "./BrandMark.astro";
 import { siteCopy } from "../data/site";
 import type { Locale } from "../data/products";
 
@@ -15,7 +14,6 @@ const year = new Date().getUTCFullYear();
 <footer class="site-footer">
   <div class="shell site-footer__grid">
     <div class="site-footer__brand">
-      <BrandMark compact />
       <div>
         <strong>Vibe AGI</strong>
         <p>{text.footerLine}</p>
@@ -45,7 +43,6 @@ const year = new Date().getUTCFullYear();
   .site-footer__brand {
     display: flex;
     align-items: flex-start;
-    gap: 1rem;
   }
 
   strong {

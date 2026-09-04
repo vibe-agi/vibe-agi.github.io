@@ -9,13 +9,10 @@ interface Props {
 const { product, size = "small" } = Astro.props;
 ---
 
-<span class:list={["glyph", `glyph--${size}`]} aria-hidden="true">
+<span class:list={["glyph", `glyph--${size}`, `glyph--${product}`]} aria-hidden="true">
   {
     product === "vibermate" && (
-      <svg viewBox="0 0 32 32">
-        <path d="M4 9h8l4 7h12M4 23h8l4-7h12" />
-        <circle cx="16" cy="16" r="3" />
-      </svg>
+      <img src="/brands/vibermate-app-icon.svg" alt="" width="64" height="64" />
     )
   }
   {
@@ -37,13 +34,28 @@ const { product, size = "small" } = Astro.props;
   }
 
   .glyph--large {
-    width: 3.25rem;
-    height: 3.25rem;
+    width: 3.75rem;
+    height: 3.75rem;
   }
 
-  svg {
+  svg,
+  img {
     width: 100%;
     height: 100%;
+  }
+
+  img {
+    object-fit: contain;
+  }
+
+  .glyph--hideout {
+    padding: 0.28rem;
+    border: 1px solid currentColor;
+    border-radius: 0.65rem;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .glyph--hideout svg {
     fill: none;
     stroke: currentColor;
     stroke-width: 1.8;
@@ -51,8 +63,8 @@ const { product, size = "small" } = Astro.props;
     stroke-linejoin: round;
   }
 
-  circle,
-  ellipse {
+  .glyph--hideout circle,
+  .glyph--hideout ellipse {
     fill: none;
   }
 </style>

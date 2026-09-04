@@ -105,9 +105,6 @@ const description = text.heroBody;
             {text.closingAction}<span class="button__arrow" aria-hidden="true">↗</span>
           </a>
         </div>
-        <div class="closing-signal" aria-hidden="true">
-          <span></span><i></i><span></span><i></i><span></span>
-        </div>
       </div>
     </section>
   </main>
@@ -139,7 +136,7 @@ const description = text.heroBody;
   }
 
   .hero .eyebrow {
-    color: var(--current);
+    color: var(--phosphor);
   }
 
   h1 {
@@ -180,9 +177,9 @@ const description = text.heroBody;
   }
 
   .hero .button {
-    border-color: var(--current);
+    border-color: var(--paper);
     color: var(--matrix);
-    background: var(--current);
+    background: var(--paper);
   }
 
   .hero .button--secondary {
@@ -211,8 +208,8 @@ const description = text.heroBody;
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 50%;
-    background: var(--current);
-    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--current) 18%, transparent);
+    background: var(--phosphor);
+    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--phosphor) 18%, transparent);
   }
 
   .products-section,
@@ -298,7 +295,7 @@ const description = text.heroBody;
   }
 
   .closing-section .eyebrow {
-    color: var(--current);
+    color: color-mix(in srgb, var(--paper) 62%, transparent);
   }
 
   .closing-section h2 {
@@ -326,30 +323,7 @@ const description = text.heroBody;
   .closing-section__button {
     border-color: var(--paper);
     color: var(--ink);
-    background: var(--current);
-  }
-
-  .closing-signal {
-    position: absolute;
-    right: -14rem;
-    bottom: -8rem;
-    left: 15%;
-    display: flex;
-    align-items: center;
-    opacity: 0.22;
-  }
-
-  .closing-signal span {
-    height: 2px;
-    flex: 1;
-    background: var(--current);
-  }
-
-  .closing-signal i {
-    width: 6rem;
-    height: 6rem;
-    border: 2px solid var(--current);
-    border-radius: 50%;
+    background: var(--paper);
   }
 
   @media (max-width: 1080px) {

@@ -343,14 +343,15 @@ const title = `${product.name} · ${product.headline[locale]} · Vibe AGI`;
 
   .next-product {
     display: block;
-    color: var(--ink);
-    background: var(--tone);
+    border-top: 3px solid var(--tone);
+    color: var(--paper);
+    background: var(--ink);
     text-decoration: none;
-    transition: filter 180ms ease;
+    transition: background 180ms ease;
   }
 
   .next-product:hover {
-    filter: saturate(1.18);
+    background: var(--matrix);
   }
 
   .next-product__inner {
@@ -362,6 +363,7 @@ const title = `${product.name} · ${product.headline[locale]} · Vibe AGI`;
   }
 
   .next-product span {
+    color: var(--tone);
     font-family: var(--font-mono);
     font-size: 0.68rem;
     letter-spacing: 0.05em;

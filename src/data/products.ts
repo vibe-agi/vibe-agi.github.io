@@ -2,7 +2,7 @@ export type Locale = "en" | "zh";
 
 export type LocalizedText = Readonly<Record<Locale, string>>;
 
-export type ProductTone = "current" | "beacon";
+export type ProductTone = "vibermate" | "beacon";
 
 export interface ProductFeature {
   title: LocalizedText;
@@ -50,7 +50,7 @@ const productCatalog: readonly Product[] = [
     slug: "vibermate",
     index: "01",
     name: "ViberMate",
-    tone: "current",
+    tone: "vibermate",
     role: localized(
       "Traffic runtime for coding agents",
       "编程 Agent 的流量运行时",

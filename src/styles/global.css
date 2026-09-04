@@ -6,7 +6,11 @@
   --ink-soft: #506158;
   --ink-faint: #77877e;
   --matrix: #06120d;
-  --current: #65e6a6;
+  --phosphor: #65e6a6;
+  --vibermate-navy: #18314b;
+  --vibermate-cyan: #62dcc7;
+  --vibermate-blue: #70b9ee;
+  --record: #ffb627;
   --sky: #73c8ff;
   --beacon: #e3ad4f;
   --coral: #ee7e6d;
@@ -187,8 +191,8 @@ button {
   line-height: 1.65;
 }
 
-.tone-current {
-  --tone: var(--current);
+.tone-vibermate {
+  --tone: var(--vibermate-blue);
 }
 
 .tone-beacon {

@@ -99,6 +99,25 @@ test("the site loads no third-party executable, style, font, or image resources"
   assert.doesNotMatch(output, /(?:fetch|XMLHttpRequest|sendBeacon)\s*\(/);
 });
 
+test("the organization mark stays distinct from the official ViberMate app icon", async () => {
+  const [home, vibermate, hideout, icon] = await Promise.all([
+    read("index.html"),
+    read("products/vibermate/index.html"),
+    read("products/hideout/index.html"),
+    read("brands/vibermate-app-icon.svg"),
+  ]);
+
+  assert.equal((home.match(/\/brands\/vibermate-app-icon\.svg/g) ?? []).length, 1);
+  assert.equal((vibermate.match(/\/brands\/vibermate-app-icon\.svg/g) ?? []).length, 1);
+  assert.doesNotMatch(hideout, /\/brands\/vibermate-app-icon\.svg/);
+
+  const header = home.match(/<header\b[\s\S]*?<\/header>/)?.[0] ?? "";
+  assert.doesNotMatch(header, /vibermate-app-icon|brand-mark/);
+  for (const color of ["#18314B", "#0B1D30", "#62DCC7", "#70B9EE", "#FFB627"]) {
+    assert.ok(icon.includes(color), `official ViberMate color ${color}`);
+  }
+});
+
 test("the home hero is a restrained code-native motion field", async () => {
   const homePages = await Promise.all([read("index.html"), read("zh/index.html")]);
   const homeOutput = homePages.join("\n");

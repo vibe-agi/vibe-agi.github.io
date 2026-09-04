@@ -1,5 +1,4 @@
 ---
-import BrandMark from "./BrandMark.astro";
 import { siteCopy } from "../data/site";
 import type { Locale } from "../data/products";
 
@@ -17,7 +16,6 @@ const home = locale === "zh" ? "/zh/" : "/";
 <header class="site-header">
   <div class="site-header__inner shell">
     <a class="wordmark" href={home} aria-label="Vibe AGI home">
-      <BrandMark compact />
       <span>Vibe AGI</span>
     </a>
     <nav aria-label={locale === "zh" ? "主导航" : "Primary navigation"}>
@@ -55,7 +53,6 @@ const home = locale === "zh" ? "/zh/" : "/";
     border-bottom: 1px solid color-mix(in srgb, var(--paper) 11%, transparent);
     color: var(--paper);
     background: color-mix(in srgb, var(--matrix) 90%, transparent);
-    --brand-surface: #153128;
     backdrop-filter: blur(18px);
   }
 
@@ -70,7 +67,6 @@ const home = locale === "zh" ? "/zh/" : "/";
     display: inline-flex;
     align-items: center;
     justify-self: start;
-    gap: 0.75rem;
     color: var(--paper);
     font-family: var(--font-display);
     font-size: 1.2rem;
@@ -96,7 +92,7 @@ const home = locale === "zh" ? "/zh/" : "/";
 
   nav a:hover,
   .language-switch:hover {
-    color: var(--current);
+    color: var(--paper);
   }
 
   nav a span {
