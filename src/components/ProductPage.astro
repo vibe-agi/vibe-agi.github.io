@@ -1,0 +1,447 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BoundaryDiagram from "./BoundaryDiagram.astro";
+import InstallCommand from "./InstallCommand.astro";
+import ProductGallery from "./ProductGallery.astro";
+import ProductGlyph from "./ProductGlyph.astro";
+import SiteFooter from "./SiteFooter.astro";
+import SiteHeader from "./SiteHeader.astro";
+import {
+  productHref,
+  products,
+  type Locale,
+  type Product,
+} from "../data/products";
+import { siteCopy } from "../data/site";
+
+interface Props {
+  locale: Locale;
+  product: Product;
+}
+
+const { locale, product } = Astro.props;
+const text = siteCopy[locale];
+const isChinese = locale === "zh";
+const alternateLocale = isChinese ? "en" : "zh";
+const alternateHref = productHref(product, alternateLocale);
+const currentIndex = products.findIndex((entry) => entry.slug === product.slug);
+const nextProduct = products[(currentIndex + 1) % products.length];
+const home = isChinese ? "/zh/" : "/";
+const title = `${product.name} · ${product.headline[locale]} · Vibe AGI`;
+---
+
+<BaseLayout
+  locale={locale}
+  alternateLocale={alternateLocale}
+  alternateHref={alternateHref}
+  title={title}
+  description={product.summary[locale]}
+  pageClass={`product-page product-page--${product.slug}`}
+>
+  <SiteHeader locale={locale} alternateHref={alternateHref} />
+  <main id="content" class:list={[`tone-${product.tone}`]}>
+    <section class="product-hero shell">
+      <div class="product-hero__copy">
+        <a class="product-back" href={`${home}#products`}>← {text.pageBack}</a>
+        <div class="product-hero__identity">
+          <ProductGlyph product={product.slug} size="large" />
+          <div>
+            <p>{product.role[locale]}</p>
+            <h1>{product.name}</h1>
+          </div>
+        </div>
+        <p class="product-status"><span></span>{product.status[locale]}</p>
+        <h2>{product.headline[locale]}</h2>
+        <p class="product-summary">{product.summary[locale]}</p>
+        <div class="product-hero__actions">
+          <a class="button" href={product.repository}>
+            {text.pageSource}<span class="button__arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="button button--secondary" href={product.release}>
+            {text.pageRelease}<span class="button__arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+      <BoundaryDiagram product={product} locale={locale} />
+    </section>
+
+    {
+      product.screenshots && (
+        <ProductGallery locale={locale} screenshots={product.screenshots} />
+      )
+    }
+
+    <section class="install-section">
+      <div class="shell install-section__grid">
+        <div>
+          <p class="eyebrow">{text.pageInstall}</p>
+          <h2>{product.name}</h2>
+          <p>{text.pagePlatform}: <strong>{product.platform[locale]}</strong></p>
+        </div>
+        <InstallCommand locale={locale} command={product.install} />
+      </div>
+    </section>
+
+    <section class="boundary-section shell">
+      <div class="boundary-section__label">
+        <p class="eyebrow">{text.pageBoundary}</p>
+        <span>{product.index} / {String(products.length).padStart(2, "0")}</span>
+      </div>
+      <p class="boundary-section__statement">{product.boundary[locale]}</p>
+    </section>
+
+    <section class="capabilities-section">
+      <div class="shell">
+        <div class="capabilities-section__heading">
+          <p class="eyebrow">{text.pageCapabilities}</p>
+          <span>{product.role[locale]}</span>
+        </div>
+        <div class="capabilities-grid">
+          {
+            product.features.map((feature, index) => (
+              <article>
+                <span>0{index + 1}</span>
+                <h3>{feature.title[locale]}</h3>
+                <p>{feature.body[locale]}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <a class:list={["next-product", `tone-${nextProduct.tone}`]} href={productHref(nextProduct, locale)}>
+      <div class="shell next-product__inner">
+        <span>{text.pageNext} · {nextProduct.index}</span>
+        <strong>{nextProduct.name}</strong>
+        <i aria-hidden="true">→</i>
+      </div>
+    </a>
+  </main>
+  <SiteFooter locale={locale} />
+</BaseLayout>
+
+<style>
+  .product-hero {
+    display: grid;
+    grid-template-columns: minmax(22rem, 0.83fr) minmax(30rem, 1.17fr);
+    align-items: center;
+    gap: clamp(2.5rem, 6vw, 5.5rem);
+    min-height: calc(100svh - 4.8rem);
+    padding-block: clamp(4rem, 8vw, 7rem);
+  }
+
+  .product-back {
+    display: inline-block;
+    margin-bottom: 3rem;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  .product-back:hover {
+    color: var(--ink);
+  }
+
+  .product-hero__identity {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    color: var(--tone);
+  }
+
+  .product-hero__identity p,
+  .product-status,
+  .product-summary {
+    margin: 0;
+  }
+
+  .product-hero__identity p {
+    margin-bottom: 0.2rem;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: clamp(3.2rem, 6vw, 6rem);
+    font-weight: 640;
+    letter-spacing: -0.06em;
+    line-height: 0.9;
+  }
+
+  .product-status {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 1.4rem;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+  }
+
+  .product-status span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--tone);
+  }
+
+  .product-hero__copy > h2 {
+    max-width: 10ch;
+    margin: 2.3rem 0 1.4rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.55rem, 4.7vw, 4.8rem);
+    font-weight: 580;
+    letter-spacing: -0.055em;
+    line-height: 0.94;
+  }
+
+  .product-summary {
+    max-width: 38rem;
+    color: var(--ink-soft);
+    font-size: 1.1rem;
+    line-height: 1.65;
+  }
+
+  .product-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  .install-section {
+    padding-block: clamp(4.5rem, 8vw, 7rem);
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .install-section__grid {
+    display: grid;
+    grid-template-columns: minmax(15rem, 0.65fr) minmax(24rem, 1.35fr);
+    align-items: center;
+    gap: clamp(2rem, 7vw, 6rem);
+  }
+
+  .install-section .eyebrow {
+    color: var(--tone);
+  }
+
+  .install-section h2 {
+    margin: 0.8rem 0 1.1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+    font-weight: 610;
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+  }
+
+  .install-section p:last-child {
+    margin: 0;
+    color: color-mix(in srgb, var(--paper) 60%, transparent);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .install-section strong {
+    color: var(--paper);
+    font-weight: 600;
+  }
+
+  .boundary-section {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.45fr) minmax(20rem, 1.55fr);
+    gap: 4rem;
+    padding-block: clamp(6rem, 12vw, 10rem);
+  }
+
+  .boundary-section__label {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .boundary-section__label span {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+  }
+
+  .boundary-section__statement {
+    max-width: 28ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.5vw, 4.5rem);
+    font-weight: 540;
+    letter-spacing: -0.05em;
+    line-height: 1.05;
+  }
+
+  .capabilities-section {
+    padding-block: clamp(5rem, 9vw, 8rem);
+    border-block: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+  }
+
+  .capabilities-section__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .capabilities-section__heading > span {
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.67rem;
+  }
+
+  .capabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .capabilities-grid article {
+    min-height: 18rem;
+    padding: 1.5rem 1.8rem 2rem;
+    border-right: 1px solid var(--line-strong);
+  }
+
+  .capabilities-grid article:first-child {
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .capabilities-grid article > span {
+    color: var(--tone);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  .capabilities-grid h3 {
+    max-width: 13ch;
+    margin: 3.5rem 0 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 2.7vw, 2.45rem);
+    font-weight: 610;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .capabilities-grid p {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  .next-product {
+    display: block;
+    color: var(--ink);
+    background: var(--tone);
+    text-decoration: none;
+    transition: filter 180ms ease;
+  }
+
+  .next-product:hover {
+    filter: saturate(1.18);
+  }
+
+  .next-product__inner {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 2rem;
+    min-height: 11rem;
+  }
+
+  .next-product span {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+  }
+
+  .next-product strong {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    font-weight: 620;
+    letter-spacing: -0.06em;
+  }
+
+  .next-product i {
+    font-family: var(--font-mono);
+    font-size: 2.5rem;
+    font-style: normal;
+    transition: transform 180ms ease;
+  }
+
+  .next-product:hover i {
+    transform: translateX(0.5rem);
+  }
+
+  @media (max-width: 1000px) {
+    .product-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .product-hero__copy {
+      max-width: 44rem;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .product-hero {
+      padding-block: 3rem 5rem;
+    }
+
+    .product-back {
+      margin-bottom: 2rem;
+    }
+
+    .product-hero__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .install-section__grid,
+    .boundary-section {
+      grid-template-columns: 1fr;
+    }
+
+    .boundary-section {
+      gap: 2.2rem;
+    }
+
+    .capabilities-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .capabilities-grid article,
+    .capabilities-grid article:first-child {
+      min-height: 0;
+      border-right: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+      border-left: 1px solid var(--line-strong);
+    }
+
+    .capabilities-grid h3 {
+      margin-top: 2.5rem;
+    }
+
+    .next-product__inner {
+      grid-template-columns: 1fr auto;
+      gap: 0.4rem 1rem;
+      padding-block: 2rem;
+    }
+
+    .next-product span {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

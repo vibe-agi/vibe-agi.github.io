@@ -1,0 +1,181 @@
+---
+import ProductGlyph from "./ProductGlyph.astro";
+import { productHref, type Locale, type Product } from "../data/products";
+import { siteCopy } from "../data/site";
+
+interface Props {
+  product: Product;
+  locale: Locale;
+}
+
+const { product, locale } = Astro.props;
+const text = siteCopy[locale];
+---
+
+<a class:list={["product-rail", `tone-${product.tone}`]} href={productHref(product, locale)}>
+  <div class="product-rail__identity">
+    <span class="product-rail__index">{product.index}</span>
+    <ProductGlyph product={product.slug} size="large" />
+  </div>
+  <div class="product-rail__name">
+    <p>{product.role[locale]}</p>
+    <h3>{product.name}</h3>
+  </div>
+  <p class="product-rail__summary">{product.summary[locale]}</p>
+  <div class="product-rail__action">
+    <span>{product.status[locale]}</span>
+    <strong>{text.productAction} <i aria-hidden="true">↗</i></strong>
+  </div>
+</a>
+
+<style>
+  .product-rail {
+    position: relative;
+    display: grid;
+    grid-template-columns: 8rem minmax(10rem, 0.8fr) minmax(16rem, 1.35fr) minmax(12rem, 0.72fr);
+    min-height: 10rem;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--line-strong);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      color 180ms ease,
+      background 180ms ease;
+  }
+
+  .product-rail:last-child {
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .product-rail::before {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    left: 0;
+    width: 0.35rem;
+    background: var(--tone);
+    content: "";
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 180ms ease;
+  }
+
+  .product-rail:hover,
+  .product-rail:focus-visible {
+    background: color-mix(in srgb, var(--tone) 14%, var(--surface));
+  }
+
+  .product-rail:hover::before,
+  .product-rail:focus-visible::before {
+    transform: scaleY(1);
+  }
+
+  .product-rail__identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--tone);
+  }
+
+  .product-rail__index {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  .product-rail__name p,
+  .product-rail__summary,
+  .product-rail__action span {
+    margin: 0;
+  }
+
+  .product-rail__name p,
+  .product-rail__action span {
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.67rem;
+    letter-spacing: 0.04em;
+  }
+
+  .product-rail h3 {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.7rem);
+    font-weight: 630;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .product-rail__summary {
+    max-width: 38rem;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    line-height: 1.55;
+  }
+
+  .product-rail__action {
+    display: grid;
+    justify-items: end;
+    gap: 1.2rem;
+    text-align: right;
+  }
+
+  .product-rail__action strong {
+    font-size: 0.9rem;
+  }
+
+  .product-rail__action i {
+    display: inline-block;
+    margin-left: 0.35rem;
+    font-family: var(--font-mono);
+    font-style: normal;
+    transition: transform 160ms ease;
+  }
+
+  .product-rail:hover .product-rail__action i {
+    transform: translate(3px, -3px);
+  }
+
+  @media (max-width: 900px) {
+    .product-rail {
+      grid-template-columns: 5rem 1fr auto;
+      gap: 1rem;
+    }
+
+    .product-rail__identity {
+      grid-row: span 2;
+    }
+
+    .product-rail__summary {
+      grid-column: 2 / -1;
+    }
+
+    .product-rail__action span {
+      display: none;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .product-rail {
+      grid-template-columns: 3.5rem 1fr;
+      min-height: 0;
+      padding: 1.4rem 0.8rem;
+    }
+
+    .product-rail__identity {
+      align-self: start;
+    }
+
+    .product-rail__index,
+    .product-rail__action {
+      display: none;
+    }
+
+    .product-rail__summary {
+      grid-column: 2;
+      font-size: 0.95rem;
+    }
+  }
+</style>

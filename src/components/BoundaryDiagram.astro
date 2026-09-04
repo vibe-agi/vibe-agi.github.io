@@ -1,0 +1,269 @@
+---
+import type { Locale, Product } from "../data/products";
+
+interface Props {
+  locale: Locale;
+  product: Product;
+}
+
+const { locale, product } = Astro.props;
+const stages = ["INPUT", "BOUNDARY", "OUTPUT"];
+---
+
+<figure id="boundary-map" class:list={["boundary-diagram", `tone-${product.tone}`]}>
+  <figcaption>
+    <span>{product.diagram.label[locale]}</span>
+    <i>BOUNDARY / {product.index}</i>
+  </figcaption>
+  <div class="boundary-diagram__stage">
+    <div class="boundary-diagram__veil" aria-hidden="true"></div>
+    <svg viewBox="0 0 820 280" preserveAspectRatio="none" aria-hidden="true">
+      <path class="guide" d="M58 144C142 144 164 103 235 103c72 0 85 82 166 82 86 0 99-96 185-96 69 0 89 55 176 55" />
+      <path class="signal" d="M58 144C142 144 164 103 235 103c72 0 85 82 166 82 86 0 99-96 185-96 69 0 89 55 176 55" />
+      <path class="pulse" d="M58 144C142 144 164 103 235 103c72 0 85 82 166 82 86 0 99-96 185-96 69 0 89 55 176 55" />
+      <line class="boundary" x1="410" y1="34" x2="410" y2="246" />
+      <circle cx="102" cy="139" r="4" />
+      <circle cx="410" cy="185" r="6" />
+      <circle cx="716" cy="133" r="4" />
+    </svg>
+    <ol class="diagram-nodes">
+      {
+        product.diagram.nodes.map((node, index) => (
+          <li class={`diagram-node diagram-node--${index + 1}`}>
+            <small>{stages[index]} · 0{index + 1}</small>
+            <span>{node[locale]}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+  <p>{product.diagram.caption[locale]}</p>
+</figure>
+
+<style>
+  .boundary-diagram {
+    position: relative;
+    min-height: 29rem;
+    overflow: hidden;
+    margin: 0;
+    border: 1px solid color-mix(in srgb, var(--paper) 20%, transparent);
+    border-radius: 0.8rem;
+    color: var(--paper);
+    background: var(--matrix);
+    box-shadow: var(--shadow);
+  }
+
+  .boundary-diagram::before {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--current) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--current) 6%, transparent) 1px, transparent 1px);
+    background-size: 2rem 2rem;
+    content: "";
+    mask-image: linear-gradient(to bottom, #000, transparent 94%);
+  }
+
+  figcaption {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 13%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+  }
+
+  figcaption i {
+    color: var(--tone);
+    font-style: normal;
+  }
+
+  .boundary-diagram__stage {
+    position: relative;
+    z-index: 2;
+    min-height: 20rem;
+  }
+
+  .boundary-diagram__veil {
+    position: absolute;
+    z-index: 0;
+    top: 9%;
+    bottom: 8%;
+    left: 41%;
+    width: 18%;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 9px, color-mix(in srgb, var(--tone) 9%, transparent) 10px 11px),
+      radial-gradient(circle at center, color-mix(in srgb, var(--tone) 14%, transparent), transparent 68%);
+    clip-path: polygon(20% 0, 100% 5%, 82% 43%, 100% 78%, 66% 100%, 2% 91%, 17% 55%, 0 20%);
+    opacity: 0.9;
+  }
+
+  svg {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  path,
+  line {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .guide {
+    stroke: color-mix(in srgb, var(--paper) 18%, transparent);
+    stroke-width: 8;
+  }
+
+  .signal {
+    stroke: color-mix(in srgb, var(--tone) 53%, transparent);
+    stroke-width: 1;
+  }
+
+  .pulse {
+    stroke: var(--tone);
+    stroke-dasharray: 2 660;
+    stroke-linecap: round;
+    stroke-width: 4;
+    filter: drop-shadow(0 0 5px var(--tone));
+    animation: diagram-pulse 5.8s linear infinite;
+  }
+
+  .boundary {
+    stroke: color-mix(in srgb, var(--tone) 32%, transparent);
+    stroke-dasharray: 2 7;
+    stroke-width: 1;
+  }
+
+  circle {
+    fill: var(--tone);
+    stroke: var(--matrix);
+    stroke-width: 3;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .diagram-nodes {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .diagram-node {
+    position: absolute;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .diagram-node--1 {
+    top: 61%;
+    left: 5.5%;
+  }
+
+  .diagram-node--2 {
+    top: 16%;
+    left: 50%;
+    color: var(--tone);
+    text-align: center;
+    transform: translateX(-50%);
+  }
+
+  .diagram-node--3 {
+    top: 61%;
+    right: 5.5%;
+    text-align: right;
+  }
+
+  .diagram-node small {
+    color: color-mix(in srgb, var(--paper) 42%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .diagram-node--2 small {
+    color: color-mix(in srgb, var(--tone) 72%, transparent);
+  }
+
+  .diagram-node span {
+    font-size: 0.75rem;
+    font-weight: 650;
+  }
+
+  figure > p {
+    position: relative;
+    z-index: 3;
+    margin: 0;
+    padding: 0 1.25rem 1.3rem;
+    color: color-mix(in srgb, var(--paper) 61%, transparent);
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+
+  @keyframes diagram-pulse {
+    to {
+      stroke-dashoffset: -662;
+    }
+  }
+
+  @media (max-width: 570px) {
+    .boundary-diagram {
+      min-height: 33rem;
+    }
+
+    .boundary-diagram__stage {
+      min-height: 25rem;
+    }
+
+    .boundary-diagram__stage svg {
+      width: 25rem;
+      height: 100%;
+      left: 50%;
+      transform: translateX(-50%) rotate(90deg);
+    }
+
+    .boundary-diagram__veil {
+      top: 41%;
+      right: 10%;
+      bottom: auto;
+      left: 10%;
+      width: auto;
+      height: 18%;
+    }
+
+    .diagram-node {
+      right: auto;
+      left: 50%;
+      text-align: center;
+      transform: translateX(-50%);
+    }
+
+    .diagram-node--1 {
+      top: 9%;
+    }
+
+    .diagram-node--2 {
+      top: 43%;
+    }
+
+    .diagram-node--3 {
+      top: 77%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse {
+      animation: none;
+      stroke-dasharray: none;
+      opacity: 0.38;
+    }
+  }
+</style>

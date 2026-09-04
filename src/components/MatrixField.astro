@@ -1,0 +1,299 @@
+<div class="matrix-field" data-matrix-field aria-hidden="true">
+  <canvas></canvas>
+  <div class="matrix-field__calibration">
+    <span>VISIBLE RUNTIME</span>
+    <span>LOCAL / EXPLICIT</span>
+  </div>
+  <div class="matrix-field__fault"></div>
+</div>
+
+<script>
+  interface SignalColumn {
+    x: number;
+    phase: number;
+    speed: number;
+    density: number;
+  }
+
+  const createRandom = (seed: number) => {
+    let state = seed >>> 0;
+    return () => {
+      state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+      return state / 4294967296;
+    };
+  };
+
+  const initializeMatrixField = (root: HTMLElement) => {
+    const canvas = root.querySelector("canvas");
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const random = createRandom(0x56494245);
+    let columns: SignalColumn[] = [];
+    let width = 1;
+    let height = 1;
+    let animationFrame = 0;
+    let visible = true;
+    let lastFrame = -Infinity;
+
+    const resize = () => {
+      const bounds = root.getBoundingClientRect();
+      const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+      width = Math.max(1, bounds.width);
+      height = Math.max(1, bounds.height);
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      context.setTransform(scale, 0, 0, scale, 0, 0);
+
+      const count = Math.max(22, Math.floor(width / 27));
+      columns = Array.from({ length: count }, (_, index) => ({
+        x: (index + 0.5) * (width / count),
+        phase: random() * (height + 240),
+        speed: 0.012 + random() * 0.022,
+        density: 0.35 + random() * 0.65,
+      }));
+    };
+
+    const drawGrid = () => {
+      context.save();
+      context.strokeStyle = "rgba(123, 224, 174, 0.055)";
+      context.lineWidth = 1;
+      const unit = Math.max(28, Math.round(width / 30));
+      for (let x = width * 0.3; x < width; x += unit) {
+        context.beginPath();
+        context.moveTo(Math.round(x) + 0.5, 0);
+        context.lineTo(Math.round(x) + 0.5, height);
+        context.stroke();
+      }
+      for (let y = unit; y < height; y += unit) {
+        context.beginPath();
+        context.moveTo(width * 0.3, Math.round(y) + 0.5);
+        context.lineTo(width, Math.round(y) + 0.5);
+        context.stroke();
+      }
+      context.restore();
+    };
+
+    const drawRain = (time: number) => {
+      context.save();
+      context.globalCompositeOperation = "lighter";
+      for (let columnIndex = 0; columnIndex < columns.length; columnIndex += 1) {
+        const column = columns[columnIndex];
+        if (column.x < width * 0.36 || column.density < 0.48) continue;
+        const head = (column.phase + time * column.speed) % (height + 260) - 80;
+        const steps = 8 + Math.floor(column.density * 10);
+
+        for (let step = 0; step < steps; step += 1) {
+          const y = head - step * 19;
+          if (y < -18 || y > height + 18) continue;
+          const strength = (1 - step / steps) * (0.08 + column.density * 0.13);
+          context.fillStyle = `rgba(90, 241, 151, ${strength})`;
+          const mark = (columnIndex + step * 3) % 5;
+          if (mark === 0) {
+            context.fillRect(column.x - 0.5, y, 1, 9);
+          } else if (mark === 1) {
+            context.fillRect(column.x - 2, y + 3, 4, 1);
+          } else if (mark === 2) {
+            context.fillRect(column.x - 1, y, 2, 2);
+            context.fillRect(column.x - 1, y + 6, 2, 4);
+          } else {
+            context.beginPath();
+            context.arc(column.x, y + 4, mark === 3 ? 1.2 : 0.7, 0, Math.PI * 2);
+            context.fill();
+          }
+        }
+      }
+      context.restore();
+    };
+
+    const drawSignal = (time: number) => {
+      const start = width * 0.2;
+      const end = width * 1.04;
+      const center = height * 0.57;
+      context.save();
+      context.globalCompositeOperation = "lighter";
+
+      for (let strand = 0; strand < 22; strand += 1) {
+        const warm = strand > 16;
+        context.beginPath();
+        for (let x = start; x <= end; x += 9) {
+          const progress = (x - start) / (end - start);
+          const envelope = Math.sin(Math.min(1, progress) * Math.PI);
+          const y =
+            center +
+            (strand - 10.5) * 3.4 +
+            Math.sin(x * 0.0105 + time * 0.00016 + strand * 0.42) * (17 + envelope * 25) +
+            Math.sin(x * 0.0038 - time * 0.00009 + strand) * 14;
+          if (x === start) context.moveTo(x, y);
+          else context.lineTo(x, y);
+        }
+        context.strokeStyle = warm
+          ? `rgba(230, 174, 74, ${0.055 + (strand - 16) * 0.008})`
+          : `rgba(94, 234, 167, ${0.055 + (strand % 6) * 0.009})`;
+        context.lineWidth = strand === 10 ? 1.4 : 0.65;
+        context.stroke();
+      }
+
+      context.beginPath();
+      for (let x = start; x <= end; x += 7) {
+        const y = center + Math.sin(x * 0.009 + time * 0.00018) * 31 + Math.sin(x * 0.0028) * 19;
+        if (x === start) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      context.strokeStyle = "rgba(116, 255, 182, 0.62)";
+      context.lineWidth = 1.15;
+      context.shadowColor = "rgba(84, 245, 155, 0.4)";
+      context.shadowBlur = 9;
+      context.stroke();
+      context.restore();
+    };
+
+    const drawEvidence = (time: number) => {
+      context.save();
+      context.fillStyle = "rgba(236, 177, 73, 0.72)";
+      for (let index = 0; index < 17; index += 1) {
+        const x = width * (0.57 + index * 0.022);
+        const y = height * 0.57 + Math.sin(index * 1.8 + time * 0.00025) * 54;
+        context.beginPath();
+        context.arc(x, y, index % 6 === 0 ? 1.8 : 0.85, 0, Math.PI * 2);
+        context.fill();
+      }
+      context.fillStyle = "rgba(238, 126, 109, 0.68)";
+      context.fillRect(width * 0.81, height * 0.26, 2, 2);
+      context.restore();
+    };
+
+    const draw = (time: number) => {
+      context.fillStyle = "#06120d";
+      context.fillRect(0, 0, width, height);
+      drawGrid();
+      drawRain(time);
+      drawSignal(time);
+      drawEvidence(time);
+    };
+
+    const loop = (time: number) => {
+      if (!visible || document.hidden || reducedMotion.matches) {
+        animationFrame = 0;
+        return;
+      }
+      if (time - lastFrame >= 1000 / 24) {
+        draw(time);
+        lastFrame = time;
+      }
+      animationFrame = window.requestAnimationFrame(loop);
+    };
+
+    const start = () => {
+      if (animationFrame || reducedMotion.matches || !visible || document.hidden) return;
+      animationFrame = window.requestAnimationFrame(loop);
+    };
+
+    const stop = () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    };
+
+    const renderForPreference = () => {
+      stop();
+      draw(0);
+      start();
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      resize();
+      renderForPreference();
+    });
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      visible = entry?.isIntersecting ?? false;
+      if (visible) start();
+      else stop();
+    });
+    const visibilityHandler = () => (document.hidden ? stop() : start());
+
+    resizeObserver.observe(root);
+    intersectionObserver.observe(root);
+    reducedMotion.addEventListener("change", renderForPreference);
+    document.addEventListener("visibilitychange", visibilityHandler);
+    resize();
+    draw(0);
+    start();
+  };
+
+  document.querySelectorAll<HTMLElement>("[data-matrix-field]").forEach(initializeMatrixField);
+</script>
+
+<style>
+  .matrix-field {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 72% 54%, rgba(59, 169, 103, 0.16), transparent 29%),
+      #06120d;
+    mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.08) 27%, #000 52%);
+  }
+
+  canvas {
+    width: 100%;
+    height: 100%;
+    opacity: 0.78;
+  }
+
+  .matrix-field__calibration {
+    position: absolute;
+    top: 1.4rem;
+    right: max(1.25rem, calc((100vw - 76rem) / 2));
+    display: flex;
+    gap: 2rem;
+    color: rgba(178, 219, 195, 0.38);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.11em;
+  }
+
+  .matrix-field__fault {
+    position: absolute;
+    top: -8%;
+    right: -5%;
+    width: 25%;
+    height: 116%;
+    background:
+      repeating-linear-gradient(102deg, transparent 0 19px, rgba(229, 174, 75, 0.1) 20px 21px),
+      linear-gradient(100deg, transparent, rgba(230, 177, 78, 0.08));
+    clip-path: polygon(38% 0, 100% 0, 100% 100%, 8% 100%, 24% 77%, 13% 59%, 32% 38%, 19% 18%);
+    mix-blend-mode: screen;
+    opacity: 0.55;
+  }
+
+  @media (max-width: 760px) {
+    .matrix-field {
+      mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.12) 48%, #000 72%);
+    }
+
+    canvas {
+      opacity: 0.62;
+    }
+
+    .matrix-field__calibration {
+      display: none;
+    }
+
+    .matrix-field__fault {
+      top: auto;
+      bottom: -4%;
+      width: 42%;
+      height: 46%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    canvas {
+      opacity: 0.66;
+    }
+  }
+</style>

@@ -1,0 +1,285 @@
+---
+import type { Locale, ProductScreenshot } from "../data/products";
+import { siteCopy } from "../data/site";
+
+interface Props {
+  locale: Locale;
+  screenshots: readonly ProductScreenshot[];
+}
+
+const { locale, screenshots } = Astro.props;
+const text = siteCopy[locale];
+---
+
+<section id="interface" class="gallery" aria-labelledby="gallery-title">
+  <div class="shell">
+    <header class="gallery__heading">
+      <div>
+        <p class="eyebrow">{text.pageScreensEyebrow}</p>
+        <h2 id="gallery-title">{text.pageScreensTitle}</h2>
+      </div>
+      <div class="gallery__note">
+        <span><i aria-hidden="true"></i>{text.pagePreviewData}</span>
+        <p>{text.pageScreensBody}</p>
+      </div>
+    </header>
+
+    <div class="gallery__grid">
+      {
+        screenshots.map((screenshot, index) => (
+          <figure class:list={["gallery-card", { "gallery-card--lead": index === 0 }]}>
+            <a
+              class="gallery-card__image"
+              href={screenshot.src}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${text.pageOpenScreenshot}: ${screenshot.title[locale]}`}
+            >
+              <span class="gallery-card__chrome" aria-hidden="true">
+                <i></i><i></i><i></i>
+                <b>ViberMate</b>
+              </span>
+              <img
+                src={screenshot.src}
+                width={screenshot.width}
+                height={screenshot.height}
+                alt={screenshot.alt[locale]}
+                loading="lazy"
+                decoding="async"
+              />
+              <span class="gallery-card__open" aria-hidden="true">↗</span>
+            </a>
+            <figcaption>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{screenshot.title[locale]}</h3>
+                <p>{screenshot.body[locale]}</p>
+              </div>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .gallery {
+    padding-block: clamp(5rem, 10vw, 9rem);
+    color: var(--paper);
+    background:
+      radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--current) 12%, transparent), transparent 28rem),
+      var(--ink);
+  }
+
+  .gallery__heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr);
+    align-items: end;
+    gap: clamp(2rem, 8vw, 7rem);
+    margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .gallery .eyebrow {
+    color: var(--current);
+  }
+
+  .gallery h2 {
+    max-width: 13ch;
+    margin: 0.9rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 6vw, 5.4rem);
+    font-weight: 610;
+    letter-spacing: -0.055em;
+    line-height: 0.94;
+  }
+
+  .gallery__note > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--current);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .gallery__note i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 0.28rem color-mix(in srgb, currentColor 14%, transparent);
+  }
+
+  .gallery__note p {
+    margin: 0.9rem 0 0;
+    color: color-mix(in srgb, var(--paper) 68%, transparent);
+    line-height: 1.65;
+  }
+
+  .gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2rem, 5vw, 4rem) clamp(1.2rem, 3vw, 2.5rem);
+  }
+
+  .gallery-card {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .gallery-card--lead {
+    grid-column: 1 / -1;
+  }
+
+  .gallery-card__image {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--paper) 25%, transparent);
+    border-radius: 0.8rem;
+    color: var(--paper);
+    background: #eef3f7;
+    box-shadow: 0 1.8rem 5rem color-mix(in srgb, #000 36%, transparent);
+    text-decoration: none;
+  }
+
+  .gallery-card__image::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 18%, transparent);
+    content: "";
+    pointer-events: none;
+  }
+
+  .gallery-card__chrome {
+    display: flex;
+    min-height: 2rem;
+    align-items: center;
+    gap: 0.38rem;
+    padding-inline: 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 15%, transparent);
+    background: #14232a;
+  }
+
+  .gallery-card__chrome i {
+    width: 0.48rem;
+    height: 0.48rem;
+    border-radius: 50%;
+    background: var(--coral);
+  }
+
+  .gallery-card__chrome i:nth-child(2) {
+    background: var(--beacon);
+  }
+
+  .gallery-card__chrome i:nth-child(3) {
+    background: var(--current);
+  }
+
+  .gallery-card__chrome b {
+    margin-left: auto;
+    color: color-mix(in srgb, var(--paper) 60%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+  }
+
+  .gallery-card img {
+    width: 100%;
+    height: auto;
+  }
+
+  .gallery-card__open {
+    position: absolute;
+    right: 0.8rem;
+    bottom: 0.8rem;
+    display: grid;
+    width: 2.4rem;
+    height: 2.4rem;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+    border-radius: 50%;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    font-family: var(--font-mono);
+    opacity: 0;
+    transform: translateY(0.35rem);
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+
+  .gallery-card__image:hover .gallery-card__open,
+  .gallery-card__image:focus-visible .gallery-card__open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  figcaption {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1rem;
+    padding-top: 1.2rem;
+  }
+
+  figcaption > span {
+    padding-top: 0.25rem;
+    color: var(--current);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+  }
+
+  figcaption h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+    font-weight: 580;
+    letter-spacing: -0.025em;
+  }
+
+  figcaption p {
+    max-width: 48rem;
+    margin: 0.45rem 0 0;
+    color: color-mix(in srgb, var(--paper) 62%, transparent);
+    line-height: 1.55;
+  }
+
+  .gallery-card--lead figcaption {
+    grid-template-columns: auto minmax(15rem, 0.65fr) minmax(18rem, 1.35fr);
+  }
+
+  .gallery-card--lead figcaption p {
+    margin-top: 0.1rem;
+  }
+
+  @media (max-width: 760px) {
+    .gallery__heading,
+    .gallery__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .gallery-card--lead {
+      grid-column: auto;
+    }
+
+    .gallery-card--lead figcaption {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .gallery-card--lead figcaption p {
+      grid-column: 2;
+      margin-top: 0.45rem;
+    }
+
+    .gallery-card__chrome {
+      min-height: 1.65rem;
+    }
+
+    .gallery-card__open {
+      display: none;
+    }
+  }
+</style>

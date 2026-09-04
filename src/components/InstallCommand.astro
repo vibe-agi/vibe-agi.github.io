@@ -1,0 +1,186 @@
+---
+import { siteCopy } from "../data/site";
+import type { Locale } from "../data/products";
+
+interface Props {
+  locale: Locale;
+  command: string;
+}
+
+const { locale, command } = Astro.props;
+const text = siteCopy[locale];
+---
+
+<div class="install-command" data-install-command data-command={command}>
+  <div class="install-command__prompt" aria-hidden="true">
+    <span>TERMINAL</span>
+    <i></i><i></i><i></i>
+  </div>
+  <div class="install-command__row">
+    <span class="install-command__symbol" aria-hidden="true">$</span>
+    <code>{command}</code>
+    <button type="button" data-copy-command aria-label={`${text.pageCopy}: ${command}`}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="8" y="8" width="11" height="11" rx="2"></rect>
+        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+      </svg>
+      <span data-copy-label>{text.pageCopy}</span>
+    </button>
+    <span class="visually-hidden" aria-live="polite" data-copy-status></span>
+  </div>
+</div>
+
+<script is:inline define:vars={{ copiedLabel: text.pageCopied }}>
+  const initializeCopyCommand = (container) => {
+    const button = container.querySelector("[data-copy-command]");
+    const label = container.querySelector("[data-copy-label]");
+    const status = container.querySelector("[data-copy-status]");
+    if (!(button instanceof HTMLButtonElement) || !label || !status) return;
+
+    const initialLabel = label.textContent ?? "";
+    button.addEventListener("click", async () => {
+      const command = container.dataset.command ?? "";
+      try {
+        await navigator.clipboard.writeText(command);
+        label.textContent = copiedLabel;
+        status.textContent = copiedLabel;
+        window.setTimeout(() => {
+          label.textContent = initialLabel;
+          status.textContent = "";
+        }, 1800);
+      } catch {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        const code = container.querySelector("code");
+        if (!selection || !code) return;
+        range.selectNodeContents(code);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    });
+  };
+
+  document.querySelectorAll("[data-install-command]").forEach(initializeCopyCommand);
+</script>
+
+<style>
+  .install-command {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--paper) 24%, transparent);
+    border-radius: 0.8rem;
+    background: color-mix(in srgb, var(--ink) 91%, var(--surface));
+  }
+
+  .install-command__prompt {
+    display: flex;
+    align-items: center;
+    gap: 0.38rem;
+    min-height: 2.4rem;
+    padding: 0 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 14%, transparent);
+    color: color-mix(in srgb, var(--paper) 48%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.57rem;
+    letter-spacing: 0.09em;
+  }
+
+  .install-command__prompt span {
+    margin-right: auto;
+  }
+
+  .install-command__prompt i {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .install-command__prompt i:nth-child(2) {
+    color: var(--coral);
+  }
+
+  .install-command__prompt i:nth-child(3) {
+    color: var(--beacon);
+  }
+
+  .install-command__prompt i:nth-child(4) {
+    color: var(--current);
+  }
+
+  .install-command__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 5rem;
+    padding: 0.8rem 0.9rem 0.8rem 1.1rem;
+  }
+
+  .install-command__symbol,
+  code {
+    font-family: var(--font-mono);
+  }
+
+  .install-command__symbol {
+    color: var(--tone, var(--current));
+  }
+
+  code {
+    overflow-x: auto;
+    color: var(--paper);
+    font-size: clamp(0.73rem, 1.4vw, 0.9rem);
+    line-height: 1.5;
+    white-space: nowrap;
+    scrollbar-width: thin;
+  }
+
+  button {
+    display: inline-flex;
+    min-height: 2.65rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--paper) 30%, transparent);
+    border-radius: 0.45rem;
+    color: var(--paper);
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 650;
+  }
+
+  button:hover {
+    border-color: var(--tone, var(--current));
+    color: var(--tone, var(--current));
+  }
+
+  button svg {
+    width: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 560px) {
+    .install-command__row {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    button {
+      grid-column: 1 / -1;
+      justify-content: center;
+    }
+  }
+</style>

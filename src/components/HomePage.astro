@@ -1,0 +1,424 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import MatrixField from "./MatrixField.astro";
+import ProductRail from "./ProductRail.astro";
+import SiteFooter from "./SiteFooter.astro";
+import SiteHeader from "./SiteHeader.astro";
+import { products, type Locale } from "../data/products";
+import { siteCopy } from "../data/site";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const text = siteCopy[locale];
+const isChinese = locale === "zh";
+const alternateHref = isChinese ? "/" : "/zh/";
+const title = isChinese
+  ? "Vibe AGI · 人与 Agent 的开放基础设施"
+  : "Vibe AGI · Open infrastructure for humans and agents";
+const description = text.heroBody;
+---
+
+<BaseLayout
+  locale={locale}
+  alternateLocale={isChinese ? "en" : "zh"}
+  alternateHref={alternateHref}
+  title={title}
+  description={description}
+  pageClass="home-page"
+>
+  <SiteHeader locale={locale} alternateHref={alternateHref} />
+  <main id="content">
+    <section class="hero-stage">
+      <MatrixField />
+      <div class="hero shell">
+        <div class="hero__copy">
+          <p class="eyebrow">{text.heroEyebrow}</p>
+          <h1>
+            <span>{text.heroTitleLead}</span>
+            <em>{text.heroTitleAccent}</em>
+          </h1>
+          <p class="hero__body">{text.heroBody}</p>
+          <div class="hero__actions">
+            <a class="button" href="#products">
+              {text.heroPrimary}<span class="button__arrow" aria-hidden="true">↓</span>
+            </a>
+            <a class="button button--secondary" href="https://github.com/vibe-agi">
+              {text.heroSecondary}<span class="button__arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+          <p class="hero__proof"><span aria-hidden="true"></span>{text.heroProof}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="products-section" id="products">
+      <div class="shell">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">{text.productsEyebrow}</p>
+            <h2>{text.productsTitle}</h2>
+          </div>
+          <p>{text.productsBody}</p>
+        </div>
+        <div class="product-list">
+          {products.map((product) => <ProductRail product={product} locale={locale} />)}
+        </div>
+      </div>
+    </section>
+
+    <section class="principles-section" id="principles">
+      <div class="shell">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">{text.principlesEyebrow}</p>
+            <h2>{text.principlesTitle}</h2>
+          </div>
+          <p>{text.principlesBody}</p>
+        </div>
+        <div class="principles-grid">
+          {
+            text.principles.map((principle, index) => (
+              <article>
+                <span class="principle-number">0{index + 1}</span>
+                <p class="principle-label">{principle.label}</p>
+                <h3>{principle.title}</h3>
+                <p>{principle.body}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="closing-section">
+      <div class="closing-section__inner shell">
+        <div>
+          <p class="eyebrow">{text.closingEyebrow}</p>
+          <h2>{text.closingTitle}</h2>
+        </div>
+        <div class="closing-section__body">
+          <p>{text.closingBody}</p>
+          <a class="button closing-section__button" href="https://github.com/vibe-agi">
+            {text.closingAction}<span class="button__arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="closing-signal" aria-hidden="true">
+          <span></span><i></i><span></span><i></i><span></span>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter locale={locale} />
+</BaseLayout>
+
+<style>
+  .hero-stage {
+    position: relative;
+    overflow: hidden;
+    color: var(--paper);
+    background: var(--matrix);
+  }
+
+  .hero {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    min-height: calc(100svh - 4.8rem);
+    padding-block: clamp(4rem, 8vw, 7rem);
+  }
+
+  .hero__copy {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    width: min(49%, 39rem);
+  }
+
+  .hero .eyebrow {
+    color: var(--current);
+  }
+
+  h1 {
+    max-width: 10ch;
+    margin: 1.2rem 0 1.7rem;
+    font-family: var(--font-display);
+    font-size: clamp(4.2rem, 7.7vw, 7.6rem);
+    font-weight: 610;
+    letter-spacing: -0.065em;
+    line-height: 0.82;
+  }
+
+  h1 span,
+  h1 em {
+    display: block;
+  }
+
+  h1 em {
+    margin-top: 0.18em;
+    color: transparent;
+    -webkit-text-stroke: 1.35px var(--paper);
+    font-style: normal;
+  }
+
+  .hero__body {
+    max-width: 38rem;
+    margin: 0;
+    color: color-mix(in srgb, var(--paper) 70%, transparent);
+    font-size: clamp(1.05rem, 1.5vw, 1.24rem);
+    line-height: 1.65;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 2.2rem;
+  }
+
+  .hero .button {
+    border-color: var(--current);
+    color: var(--matrix);
+    background: var(--current);
+  }
+
+  .hero .button--secondary {
+    border-color: color-mix(in srgb, var(--paper) 48%, transparent);
+    color: var(--paper);
+    background: color-mix(in srgb, var(--matrix) 72%, transparent);
+  }
+
+  .hero .button--secondary:hover {
+    border-color: var(--paper);
+    color: var(--matrix);
+    background: var(--paper);
+  }
+
+  .hero__proof {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 1.4rem 0 0;
+    color: color-mix(in srgb, var(--paper) 52%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  .hero__proof span {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--current);
+    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--current) 18%, transparent);
+  }
+
+  .products-section,
+  .principles-section {
+    padding-block: clamp(6rem, 12vw, 10rem);
+  }
+
+  .products-section {
+    border-block: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+  }
+
+  .product-list {
+    border-inline: 1px solid var(--line-strong);
+  }
+
+  .principles-section {
+    background: var(--paper);
+  }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .principles-grid article {
+    min-height: 24rem;
+    padding: 1.5rem 2rem 2.5rem;
+    border-right: 1px solid var(--line-strong);
+  }
+
+  .principles-grid article:first-child {
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .principle-number,
+  .principle-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  .principle-number {
+    display: block;
+    color: var(--ink-faint);
+  }
+
+  .principle-label {
+    margin: 5rem 0 0.8rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+  }
+
+  .principles-grid h3 {
+    max-width: 12ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.7rem);
+    font-weight: 610;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .principles-grid article > p:last-child {
+    margin: 1.5rem 0 0;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+
+  .closing-section {
+    overflow: hidden;
+    padding-block: clamp(6rem, 12vw, 10rem);
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .closing-section__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+    align-items: end;
+    gap: 4rem;
+  }
+
+  .closing-section .eyebrow {
+    color: var(--current);
+  }
+
+  .closing-section h2 {
+    max-width: 13ch;
+    margin: 1rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(3.3rem, 7vw, 6.7rem);
+    font-weight: 610;
+    letter-spacing: -0.06em;
+    line-height: 0.9;
+  }
+
+  .closing-section__body {
+    position: relative;
+    z-index: 2;
+  }
+
+  .closing-section__body p {
+    margin: 0 0 1.8rem;
+    color: color-mix(in srgb, var(--paper) 70%, transparent);
+    font-size: 1.05rem;
+    line-height: 1.65;
+  }
+
+  .closing-section__button {
+    border-color: var(--paper);
+    color: var(--ink);
+    background: var(--current);
+  }
+
+  .closing-signal {
+    position: absolute;
+    right: -14rem;
+    bottom: -8rem;
+    left: 15%;
+    display: flex;
+    align-items: center;
+    opacity: 0.22;
+  }
+
+  .closing-signal span {
+    height: 2px;
+    flex: 1;
+    background: var(--current);
+  }
+
+  .closing-signal i {
+    width: 6rem;
+    height: 6rem;
+    border: 2px solid var(--current);
+    border-radius: 50%;
+  }
+
+  @media (max-width: 1080px) {
+    .hero__copy {
+      width: min(58%, 39rem);
+    }
+
+    h1 {
+      max-width: 11ch;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .hero {
+      min-height: calc(100svh - 4.25rem);
+      align-items: flex-start;
+      padding-block: 3.75rem 15rem;
+    }
+
+    .hero__copy {
+      width: 100%;
+    }
+
+    h1 {
+      max-width: 100%;
+      font-size: clamp(3.7rem, 17vw, 5.5rem);
+      overflow-wrap: anywhere;
+    }
+
+    :global(html[lang="zh-CN"]) h1 {
+      font-size: clamp(3.15rem, 14vw, 4.6rem);
+      letter-spacing: -0.05em;
+      line-height: 0.88;
+    }
+
+    .hero__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .products-section,
+    .principles-section {
+      padding-block: 5.5rem;
+    }
+
+    .principles-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .principles-grid article,
+    .principles-grid article:first-child {
+      min-height: 0;
+      padding: 1.4rem 1.25rem 2.4rem;
+      border-right: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+      border-left: 1px solid var(--line-strong);
+    }
+
+    .principle-label {
+      margin-top: 3rem;
+    }
+
+    .closing-section__inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .closing-section h2 {
+      font-size: clamp(3.2rem, 15vw, 5rem);
+    }
+  }
+</style>

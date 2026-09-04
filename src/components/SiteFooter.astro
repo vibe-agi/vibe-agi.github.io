@@ -1,0 +1,87 @@
+---
+import BrandMark from "./BrandMark.astro";
+import { siteCopy } from "../data/site";
+import type { Locale } from "../data/products";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const text = siteCopy[locale];
+const year = new Date().getUTCFullYear();
+---
+
+<footer class="site-footer">
+  <div class="shell site-footer__grid">
+    <div class="site-footer__brand">
+      <BrandMark compact />
+      <div>
+        <strong>Vibe AGI</strong>
+        <p>{text.footerLine}</p>
+      </div>
+    </div>
+    <div class="site-footer__meta">
+      <p>{text.footerPrivacy}</p>
+      <p>© {year} Vibe AGI · <a href="https://github.com/vibe-agi">GitHub ↗</a></p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding: 3rem 0;
+    border-top: 1px solid var(--line);
+    background: var(--paper-deep);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 1fr);
+    align-items: end;
+    gap: 2rem;
+  }
+
+  .site-footer__brand {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+  }
+
+  p {
+    max-width: 37rem;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .site-footer__meta {
+    display: grid;
+    justify-items: end;
+    gap: 0.35rem;
+    text-align: right;
+  }
+
+  a {
+    color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    .site-footer__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .site-footer__meta {
+      justify-items: start;
+      text-align: left;
+    }
+  }
+</style>

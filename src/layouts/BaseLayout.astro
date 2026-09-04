@@ -1,0 +1,79 @@
+---
+import "@fontsource-variable/familjen-grotesk/wght.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import "../styles/global.css";
+
+import type { Locale } from "../data/products";
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  alternateHref: string;
+  alternateLocale: Locale;
+  pageClass?: string;
+  indexable?: boolean;
+}
+
+const {
+  locale,
+  title,
+  description,
+  alternateHref,
+  alternateLocale,
+  pageClass = "",
+  indexable = true,
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const alternate = new URL(alternateHref, Astro.site);
+const localeTag = locale === "zh" ? "zh-CN" : "en";
+const alternateTag = alternateLocale === "zh" ? "zh-CN" : "en";
+const socialLocale = locale === "zh" ? "zh_CN" : "en_US";
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Vibe AGI",
+  url: "https://vibe-agi.github.io",
+  sameAs: ["https://github.com/vibe-agi"],
+};
+---
+
+<!doctype html>
+<html lang={localeTag}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#102229" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {
+      indexable ? (
+        <>
+          <link rel="canonical" href={canonical} />
+          <link rel="alternate" hreflang={alternateTag} href={alternate} />
+          <link rel="alternate" hreflang={localeTag} href={canonical} />
+          <link rel="alternate" hreflang="x-default" href={locale === "en" ? canonical : alternate} />
+        </>
+      ) : (
+        <meta name="robots" content="noindex, nofollow" />
+      )
+    }
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vibe AGI" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {indexable && <meta property="og:url" content={canonical} />}
+    <meta property="og:locale" content={socialLocale} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <title>{title}</title>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+  </head>
+  <body class={pageClass}>
+    <slot />
+  </body>
+</html>
