@@ -29,8 +29,8 @@ const nextProduct = products[(currentIndex + 1) % products.length];
 const home = isChinese ? "/zh/" : "/";
 const title = product.slug === "vibermate"
   ? isChinese
-    ? "ViberMate — macOS 上的 Claude Code 与 Codex 流量控制工具 | Vibe AGI"
-    : "ViberMate — Traffic control for Claude Code and Codex on macOS | Vibe AGI"
+    ? "ViberMate — 面向 macOS、Linux 与 Web 的 Claude Code 和 Codex 流量运行时 | Vibe AGI"
+    : "ViberMate — Claude Code and Codex traffic runtime for macOS, Linux and Web | Vibe AGI"
   : isChinese
     ? "Hideout — macOS 上的 AI Agent 本地虚拟机沙箱 | Vibe AGI"
     : "Hideout — Local VM sandbox for AI agents on macOS | Vibe AGI";
@@ -46,6 +46,14 @@ const socialImage = leadScreenshot
       height: leadScreenshot.height,
     }
   : undefined;
+const setupPaths = product.setupPaths ?? [
+  {
+    title: { en: product.name, zh: product.name },
+    platform: product.platform,
+    body: product.summary,
+    command: product.install,
+  },
+];
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
@@ -141,13 +149,28 @@ const structuredData = {
     }
 
     <section class="install-section">
-      <div class="shell install-section__grid">
-        <div>
+      <div class="shell">
+        <header class="install-section__heading">
+          <div>
           <p class="eyebrow">{text.pageInstall}</p>
           <h2>{product.name}</h2>
+          </div>
           <p>{text.pagePlatform}: <strong>{product.platform[locale]}</strong></p>
+        </header>
+        <div class="setup-paths">
+          {
+            setupPaths.map((path) => (
+              <article class="setup-path">
+                <div>
+                  <h3>{path.title[locale]}</h3>
+                  <p class="setup-path__platform">{path.platform[locale]}</p>
+                  <p>{path.body[locale]}</p>
+                </div>
+                <InstallCommand locale={locale} command={path.command} />
+              </article>
+            ))
+          }
         </div>
-        <InstallCommand locale={locale} command={product.install} />
       </div>
     </section>
 
@@ -290,11 +313,17 @@ const structuredData = {
     background: var(--ink);
   }
 
-  .install-section__grid {
+  .install-section__heading,
+  .setup-path {
     display: grid;
     grid-template-columns: minmax(15rem, 0.65fr) minmax(24rem, 1.35fr);
-    align-items: center;
+    align-items: start;
     gap: clamp(2rem, 7vw, 6rem);
+  }
+
+  .install-section__heading {
+    align-items: end;
+    margin-bottom: 2.5rem;
   }
 
   .install-section .eyebrow {
@@ -310,7 +339,8 @@ const structuredData = {
     line-height: 0.95;
   }
 
-  .install-section p:last-child {
+  .install-section__heading > p,
+  .setup-path p {
     margin: 0;
     color: color-mix(in srgb, var(--paper) 60%, transparent);
     font-size: 0.85rem;
@@ -320,6 +350,30 @@ const structuredData = {
   .install-section strong {
     color: var(--paper);
     font-weight: 600;
+  }
+
+  .setup-paths {
+    border-top: 1px solid color-mix(in srgb, var(--paper) 20%, transparent);
+  }
+
+  .setup-path {
+    padding-block: 2rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 20%, transparent);
+  }
+
+  .setup-path h3 {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 2.5vw, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
+
+  .setup-path .setup-path__platform {
+    margin-bottom: 1rem;
+    color: var(--tone);
+    font-family: var(--font-mono);
+    font-size: 0.67rem;
   }
 
   .boundary-section {
@@ -480,7 +534,8 @@ const structuredData = {
       flex-direction: column;
     }
 
-    .install-section__grid,
+    .install-section__heading,
+    .setup-path,
     .boundary-section {
       grid-template-columns: 1fr;
     }

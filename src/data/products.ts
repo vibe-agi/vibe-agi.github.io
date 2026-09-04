@@ -17,11 +17,19 @@ export interface ProductDiagram {
 
 export interface ProductScreenshot {
   src: string;
+  previewSrc: string;
   title: LocalizedText;
   body: LocalizedText;
   alt: LocalizedText;
   width: number;
   height: number;
+}
+
+export interface ProductSetupPath {
+  title: LocalizedText;
+  platform: LocalizedText;
+  body: LocalizedText;
+  command: string;
 }
 
 export interface Product {
@@ -37,6 +45,7 @@ export interface Product {
   boundary: LocalizedText;
   platform: LocalizedText;
   install: string;
+  setupPaths?: readonly ProductSetupPath[];
   repository: string;
   release: string;
   features: readonly ProductFeature[];
@@ -56,8 +65,11 @@ const productCatalog: readonly Product[] = [
       "Traffic runtime for coding agents",
       "编程 Agent 的流量运行时",
     ),
-    status: localized("macOS preview · v0.1.0", "macOS 预览版 · v0.1.0"),
-    version: "0.1.0",
+    status: localized(
+      "macOS + Linux preview · v0.1.1",
+      "macOS + Linux 预览版 · v0.1.1",
+    ),
+    version: "0.1.1",
     headline: localized(
       "See every turn. Choose every route.",
       "看清每个 Turn，决定每条去向。",
@@ -67,22 +79,49 @@ const productCatalog: readonly Product[] = [
       "看清并控制 Claude Code 和 Codex CLI 如何连接 AI 服务。",
     ),
     boundary: localized(
-      "ViberMate owns the boundary between a coding agent and its AI provider: capture, routing, account choice, message rules, and local evidence stay visible in one macOS app.",
-      "ViberMate 管理编程 Agent 与 AI 服务之间的边界：捕获、路由、账号选择、消息规则和本地证据都集中在一个 macOS App 中。",
+      "ViberMate owns the boundary between a coding agent and its AI provider. The macOS App and Linux Web Runtime expose the same capture, routing, account, message-rule, and evidence model to one or many Runtime Users.",
+      "ViberMate 管理编程 Agent 与 AI 服务之间的边界。macOS App 与 Linux Web Runtime 为一个或多个 Runtime User 提供相同的捕获、路由、账号、消息规则和证据模型。",
     ),
     platform: localized(
-      "macOS 14+ · Apple Silicon + Intel",
-      "macOS 14+ · Apple 芯片 + Intel",
+      "macOS 14+ App · Linux x86-64/ARM64 Server + Web",
+      "macOS 14+ App · Linux x86-64/ARM64 Server + Web",
     ),
     install: "brew install --cask vibe-agi/tap/vibermate",
+    setupPaths: [
+      {
+        title: localized("macOS App", "macOS App"),
+        platform: localized(
+          "macOS 14+ · Apple silicon and Intel",
+          "macOS 14+ · Apple 芯片与 Intel",
+        ),
+        body: localized(
+          "Install one App with the local Runtime included. Start Claude or Codex with the vibermate command, or open the browser address shown under Settings → Team access on the same Mac.",
+          "安装一个已包含本地 Runtime 的 App。用 vibermate 命令启动 Claude 或 Codex，也可在同一台 Mac 上打开“设置 → 团队接入”显示的浏览器地址。",
+        ),
+        command: "brew install --cask vibe-agi/tap/vibermate",
+      },
+      {
+        title: localized("Linux Server + Web", "Linux Server + Web"),
+        platform: localized(
+          "Linux x86-64 and ARM64",
+          "Linux x86-64 与 ARM64",
+        ),
+        body: localized(
+          "Extract the matching release archive, start the Runtime, then open the printed address with its owner key. Create one Runtime User per person or device under Settings → Team access.",
+          "解压对应架构的版本包并启动 Runtime，然后用输出的地址和所有者密钥进入网页。在“设置 → 团队接入”中为每个人或设备创建 Runtime User。",
+        ),
+        command:
+          "./vibermated server --listen 0.0.0.0:9666 --transport self_signed_tls",
+      },
+    ],
     repository: "https://github.com/vibe-agi/vibermate",
-    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.0",
+    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.1",
     features: [
       {
         title: localized("Keep the normal workflow", "保留原来的使用方式"),
         body: localized(
-          "Launch Claude Code or Codex from Terminal and inspect the same run in ViberMate.",
-          "从终端启动 Claude Code 或 Codex，再回到 ViberMate 查看同一次运行。",
+          "Launch Claude Code or Codex from Terminal and inspect the same run in the macOS App or Web workbench.",
+          "从终端启动 Claude Code 或 Codex，再在 macOS App 或 Web 工作台查看同一次运行。",
         ),
       },
       {
@@ -114,7 +153,8 @@ const productCatalog: readonly Product[] = [
     },
     screenshots: [
       {
-        src: "/images/vibermate/capture-timeline.png",
+        src: "/images/vibermate/capture-timeline-2400.webp",
+        previewSrc: "/images/vibermate/capture-timeline-1280.webp",
         title: localized(
           "Follow one Capture, Turn by Turn",
           "沿着一次 Capture，逐个查看 Turn",
@@ -127,11 +167,12 @@ const productCatalog: readonly Product[] = [
           "ViberMate Capture view showing Claude Code and Codex conversations as a Turn timeline",
           "ViberMate 捕获视图，以 Turn 时间线展示 Claude Code 与 Codex 对话",
         ),
-        width: 4018,
-        height: 2244,
+        width: 2400,
+        height: 1341,
       },
       {
-        src: "/images/vibermate/raw-evidence.png",
+        src: "/images/vibermate/raw-evidence-2400.webp",
+        previewSrc: "/images/vibermate/raw-evidence-1280.webp",
         title: localized(
           "Inspect the evidence behind a Turn",
           "检查一个 Turn 背后的证据",
@@ -144,11 +185,12 @@ const productCatalog: readonly Product[] = [
           "Expanded ViberMate Turn showing frozen routing evidence and retained raw HTTP boundaries",
           "展开后的 ViberMate Turn，显示冻结路由证据与保留的原始 HTTP 边界",
         ),
-        width: 4018,
-        height: 2244,
+        width: 2400,
+        height: 1341,
       },
       {
-        src: "/images/vibermate/traffic-policies.png",
+        src: "/images/vibermate/traffic-policies-2400.webp",
+        previewSrc: "/images/vibermate/traffic-policies-1280.webp",
         title: localized(
           "Make every route explicit",
           "让每条路由都有明确规则",
@@ -161,11 +203,12 @@ const productCatalog: readonly Product[] = [
           "ViberMate Traffic policies view with Anthropic, OpenAI, and ChatGPT client routes",
           "ViberMate 流量策略视图，展示 Anthropic、OpenAI 与 ChatGPT 客户端路由",
         ),
-        width: 4018,
-        height: 2244,
+        width: 2400,
+        height: 1341,
       },
       {
-        src: "/images/vibermate/script-library.png",
+        src: "/images/vibermate/script-library-2400.webp",
+        previewSrc: "/images/vibermate/script-library-1280.webp",
         title: localized(
           "Turn JavaScript into reusable policy",
           "把 JavaScript 变成可复用策略",
@@ -178,11 +221,12 @@ const productCatalog: readonly Product[] = [
           "ViberMate Script library with message transform examples and syntax highlighted JavaScript",
           "ViberMate 脚本库，展示消息变换示例与带语法高亮的 JavaScript",
         ),
-        width: 4018,
-        height: 2244,
+        width: 2400,
+        height: 1341,
       },
       {
-        src: "/images/vibermate/team-insights.png",
+        src: "/images/vibermate/team-insights-2400.webp",
+        previewSrc: "/images/vibermate/team-insights-1280.webp",
         title: localized(
           "See usage from retained evidence",
           "从保留证据看清团队使用情况",
@@ -195,8 +239,8 @@ const productCatalog: readonly Product[] = [
           "ViberMate Team insights view with API call activity and token totals for one runtime user",
           "ViberMate 团队洞察视图，显示一名运行时用户的 API 调用活动与 Token 汇总",
         ),
-        width: 4018,
-        height: 2244,
+        width: 2400,
+        height: 1341,
       },
     ],
   },

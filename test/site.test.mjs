@@ -16,6 +16,7 @@ const expectedPages = [
   "zh/products/hideout/index.html",
   "zh/products/vibermate/index.html",
 ];
+const verificationFiles = ["google7e0612a67505c1a7.html"];
 
 async function filesUnder(directory) {
   const entries = await readdir(directory, { recursive: true, withFileTypes: true });
@@ -50,12 +51,19 @@ function localTarget(reference) {
 
 test("the build publishes exactly the intended bilingual pages", async () => {
   const htmlFiles = (await filesUnder(dist)).filter((file) => file.endsWith(".html"));
-  assert.deepEqual(htmlFiles, expectedPages);
+  assert.deepEqual(htmlFiles, [...expectedPages, ...verificationFiles].sort());
 
   const allHtml = await Promise.all(htmlFiles.map(read));
   const output = allHtml.join("\n");
   assert.doesNotMatch(output, /\/products\/(?:human|s3disk)\//i);
   assert.doesNotMatch(output, />\s*(?:Human|s3disk)\s*</);
+});
+
+test("the Google Search Console ownership token is published verbatim", async () => {
+  assert.equal(
+    await read("google7e0612a67505c1a7.html"),
+    "google-site-verification: google7e0612a67505c1a7.html\n",
+  );
 });
 
 test("every page has complete language, metadata, and document landmarks", async () => {
@@ -154,7 +162,7 @@ test("search engines receive truthful site, software, and breadcrumb data", asyn
   assert.deepEqual(homeTypes, new Set(["Organization", "WebSite"]));
 
   for (const [relativePath, name, version, screenshotCount] of [
-    ["products/vibermate/index.html", "ViberMate", "0.1.0", 5],
+    ["products/vibermate/index.html", "ViberMate", "0.1.1", 5],
     ["products/hideout/index.html", "Hideout", "0.1.0-alpha.3", 0],
   ]) {
     const html = await read(relativePath);
@@ -185,10 +193,10 @@ test("ViberMate pages expose a crawlable large social preview", async () => {
     const html = await read(relativePath);
     assert.match(
       html,
-      /<meta property="og:image" content="https:\/\/vibe-agi\.github\.io\/images\/vibermate\/capture-timeline\.png">/,
+      /<meta property="og:image" content="https:\/\/vibe-agi\.github\.io\/images\/vibermate\/capture-timeline-2400\.webp">/,
     );
-    assert.match(html, /<meta property="og:image:width" content="4018">/);
-    assert.match(html, /<meta property="og:image:height" content="2244">/);
+    assert.match(html, /<meta property="og:image:width" content="2400">/);
+    assert.match(html, /<meta property="og:image:height" content="1341">/);
     assert.match(
       html,
       /<meta name="twitter:card" content="summary_large_image">/,
@@ -243,6 +251,18 @@ test("the organization mark stays distinct from the official ViberMate app icon"
   }
 });
 
+test("the home page presents two standalone products above the fold", async () => {
+  for (const relativePath of ["index.html", "zh/index.html"]) {
+    const html = await read(relativePath);
+    const hero = html.match(/<section\b[^>]*class="hero-stage"[^>]*>[\s\S]*?<\/section>/)?.[0] ?? "";
+    assert.equal((hero.match(/class="product-choice /g) ?? []).length, 2);
+    assert.match(hero, /Standalone product|独立产品/);
+    assert.match(hero, /ViberMate/);
+    assert.match(hero, /Hideout/);
+    assert.doesNotMatch(hero, /Two boundaries|两层边界/);
+  }
+});
+
 test("the home hero is a restrained code-native motion field", async () => {
   const homePages = await Promise.all([read("index.html"), read("zh/index.html")]);
   const homeOutput = homePages.join("\n");
@@ -271,7 +291,7 @@ test("product pages expose the supported install and release paths", async () =>
     [
       "products/vibermate/index.html",
       "brew install --cask vibe-agi/tap/vibermate",
-      "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.0",
+      "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.1",
     ],
     [
       "products/hideout/index.html",
@@ -287,25 +307,39 @@ test("product pages expose the supported install and release paths", async () =>
   }
 });
 
-test("ViberMate's gallery uses five valid, full-resolution preview screenshots", async () => {
+function lossyWebPDimensions(image) {
+  assert.equal(image.subarray(0, 4).toString("ascii"), "RIFF");
+  assert.equal(image.subarray(8, 12).toString("ascii"), "WEBP");
+  assert.equal(image.subarray(12, 16).toString("ascii"), "VP8 ");
+  assert.deepEqual(image.subarray(23, 26), Buffer.from([0x9d, 0x01, 0x2a]));
+  return {
+    width: image.readUInt16LE(26) & 0x3fff,
+    height: image.readUInt16LE(28) & 0x3fff,
+  };
+}
+
+test("ViberMate's gallery uses responsive, bounded WebP screenshots", async () => {
   const screenshotNames = [
-    "capture-timeline.png",
-    "raw-evidence.png",
-    "traffic-policies.png",
-    "script-library.png",
-    "team-insights.png",
+    "capture-timeline",
+    "raw-evidence",
+    "traffic-policies",
+    "script-library",
+    "team-insights",
   ];
 
   for (const name of screenshotNames) {
-    const relativePath = `images/vibermate/${name}`;
-    const filePath = path.join(dist, relativePath);
-    const image = await readFile(filePath);
-    const details = await stat(filePath);
-
-    assert.deepEqual(image.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), name);
-    assert.equal(image.readUInt32BE(16), 4018, `${name} width`);
-    assert.equal(image.readUInt32BE(20), 2244, `${name} height`);
-    assert.ok(details.size > 500_000, `${name} should retain the supplied screenshot detail`);
+    for (const [suffix, width, height, maximumBytes] of [
+      ["1280", 1280, 715, 80_000],
+      ["2400", 2400, 1341, 180_000],
+    ]) {
+      const relativePath = `images/vibermate/${name}-${suffix}.webp`;
+      const filePath = path.join(dist, relativePath);
+      const image = await readFile(filePath);
+      const details = await stat(filePath);
+      assert.deepEqual(lossyWebPDimensions(image), { width, height }, relativePath);
+      assert.ok(details.size > 20_000, `${relativePath} should retain UI detail`);
+      assert.ok(details.size < maximumBytes, `${relativePath} should stay lightweight`);
+    }
   }
 
   for (const relativePath of [
@@ -313,7 +347,8 @@ test("ViberMate's gallery uses five valid, full-resolution preview screenshots",
     "zh/products/vibermate/index.html",
   ]) {
     const html = await read(relativePath);
-    assert.equal((html.match(/<img\b[^>]*\/images\/vibermate\//g) ?? []).length, 5, relativePath);
+    assert.equal((html.match(/<img\b[^>]*\/images\/vibermate\/[^>]*-1280\.webp/g) ?? []).length, 5, relativePath);
+    assert.equal((html.match(/srcset="[^"]*-1280\.webp 1280w, [^"]*-2400\.webp 2400w"/g) ?? []).length, 5, relativePath);
     assert.equal((html.match(/loading="lazy"/g) ?? []).length, 5, relativePath);
     assert.match(html, /Deterministic preview data|确定性预览数据/, relativePath);
   }

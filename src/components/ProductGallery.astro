@@ -40,7 +40,11 @@ const text = siteCopy[locale];
                 <b>ViberMate</b>
               </span>
               <img
-                src={screenshot.src}
+                src={screenshot.previewSrc}
+                srcset={`${screenshot.previewSrc} 1280w, ${screenshot.src} 2400w`}
+                sizes={index === 0
+                  ? "(max-width: 760px) calc(100vw - 1.5rem), min(76rem, calc(100vw - 2.5rem))"
+                  : "(max-width: 760px) calc(100vw - 1.5rem), min(37rem, calc(50vw - 2.5rem))"}
                 width={screenshot.width}
                 height={screenshot.height}
                 alt={screenshot.alt[locale]}

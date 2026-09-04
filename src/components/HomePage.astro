@@ -1,10 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import MatrixField from "./MatrixField.astro";
-import ProductRail from "./ProductRail.astro";
+import ProductGlyph from "./ProductGlyph.astro";
 import SiteFooter from "./SiteFooter.astro";
 import SiteHeader from "./SiteHeader.astro";
-import { products, type Locale } from "../data/products";
+import { productHref, products, type Locale } from "../data/products";
 import { siteCopy } from "../data/site";
 
 interface Props {
@@ -16,8 +16,8 @@ const text = siteCopy[locale];
 const isChinese = locale === "zh";
 const alternateHref = isChinese ? "/" : "/zh/";
 const title = isChinese
-  ? "Vibe AGI — 面向 AI 编程 Agent 的本地优先工具"
-  : "Vibe AGI — Local-first tools for AI coding agents";
+  ? "Vibe AGI — 面向 AI 开发者与团队的独立工具"
+  : "Vibe AGI — Independent tools for AI developers and teams";
 const description = text.heroBody;
 const siteUrl = new URL("/", Astro.site).href;
 const organizationId = `${siteUrl}#organization`;
@@ -37,7 +37,7 @@ const structuredData = {
       "@id": `${siteUrl}#website`,
       url: siteUrl,
       name: "Vibe AGI",
-      alternateName: "Vibe AGI Open Infrastructure",
+      alternateName: "Vibe AGI Open Product Studio",
       description: siteCopy.en.heroBody,
       inLanguage: ["en", "zh-CN"],
       publisher: { "@id": organizationId },
@@ -77,21 +77,48 @@ const structuredData = {
           </div>
           <p class="hero__proof"><span aria-hidden="true"></span>{text.heroProof}</p>
         </div>
+
+        <div class="product-switcher" id="products" aria-label={text.productsTitle}>
+          <div class="product-switcher__heading">
+            <span>{text.productsEyebrow}</span>
+            <span>02 / 02</span>
+          </div>
+          {
+            products.map((product) => (
+              <a
+                class:list={["product-choice", `tone-${product.tone}`]}
+                href={productHref(product, locale)}
+              >
+                <div class="product-choice__topline">
+                  <span>{product.index}</span>
+                  <span>{text.productIndependent}</span>
+                </div>
+                <div class="product-choice__identity">
+                  <ProductGlyph product={product.slug} size="large" />
+                  <div>
+                    <h2>{product.name}</h2>
+                    <p>{product.role[locale]}</p>
+                  </div>
+                </div>
+                <p class="product-choice__summary">{product.summary[locale]}</p>
+                <div class="product-choice__footer">
+                  <span>{product.status[locale]}</span>
+                  <strong>{text.productAction} <i aria-hidden="true">↗</i></strong>
+                </div>
+              </a>
+            ))
+          }
+        </div>
       </div>
     </section>
 
-    <section class="products-section" id="products">
-      <div class="shell">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">{text.productsEyebrow}</p>
-            <h2>{text.productsTitle}</h2>
-          </div>
-          <p>{text.productsBody}</p>
+    <section class="independence-section">
+      <div class="shell independence-section__grid">
+        <div>
+          <p class="eyebrow">{text.productsEyebrow}</p>
+          <h2>{text.productsTitle}</h2>
         </div>
-        <div class="product-list">
-          {products.map((product) => <ProductRail product={product} locale={locale} />)}
-        </div>
+        <p>{text.productsBody}</p>
       </div>
     </section>
 
@@ -148,31 +175,34 @@ const structuredData = {
   .hero {
     position: relative;
     z-index: 2;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(24rem, 1fr) minmax(24rem, 0.88fr);
     align-items: center;
+    gap: clamp(3rem, 7vw, 7rem);
     min-height: calc(100svh - 4.8rem);
-    padding-block: clamp(4rem, 8vw, 7rem);
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .hero > * {
+    min-width: 0;
   }
 
   .hero__copy {
-    position: relative;
-    z-index: 2;
     min-width: 0;
-    width: min(49%, 39rem);
   }
 
   .hero .eyebrow {
-    color: var(--phosphor);
+    color: color-mix(in srgb, var(--vibermate-blue) 82%, var(--paper));
   }
 
   h1 {
     max-width: 10ch;
     margin: 1.2rem 0 1.7rem;
     font-family: var(--font-display);
-    font-size: clamp(4.2rem, 7.7vw, 7.6rem);
+    font-size: clamp(4rem, 7.3vw, 7.2rem);
     font-weight: 610;
     letter-spacing: -0.065em;
-    line-height: 0.82;
+    line-height: 0.84;
   }
 
   h1 span,
@@ -190,8 +220,8 @@ const structuredData = {
   .hero__body {
     max-width: 38rem;
     margin: 0;
-    color: color-mix(in srgb, var(--paper) 70%, transparent);
-    font-size: clamp(1.05rem, 1.5vw, 1.24rem);
+    color: color-mix(in srgb, var(--paper) 72%, transparent);
+    font-size: clamp(1.05rem, 1.5vw, 1.22rem);
     line-height: 1.65;
   }
 
@@ -199,7 +229,7 @@ const structuredData = {
     display: flex;
     flex-wrap: wrap;
     gap: 0.8rem;
-    margin-top: 2.2rem;
+    margin-top: 2.1rem;
   }
 
   .hero .button {
@@ -209,9 +239,9 @@ const structuredData = {
   }
 
   .hero .button--secondary {
-    border-color: color-mix(in srgb, var(--paper) 48%, transparent);
+    border-color: color-mix(in srgb, var(--paper) 38%, transparent);
     color: var(--paper);
-    background: color-mix(in srgb, var(--matrix) 72%, transparent);
+    background: color-mix(in srgb, var(--matrix) 74%, transparent);
   }
 
   .hero .button--secondary:hover {
@@ -224,32 +254,195 @@ const structuredData = {
     display: flex;
     align-items: center;
     gap: 0.55rem;
-    margin: 1.4rem 0 0;
+    margin: 1.35rem 0 0;
     color: color-mix(in srgb, var(--paper) 52%, transparent);
     font-family: var(--font-mono);
     font-size: 0.65rem;
   }
 
   .hero__proof span {
-    width: 0.55rem;
-    height: 0.55rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 1px solid var(--vibermate-blue);
     border-radius: 50%;
-    background: var(--phosphor);
-    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--phosphor) 18%, transparent);
   }
 
-  .products-section,
+  .product-switcher {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid color-mix(in srgb, var(--paper) 18%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--matrix) 82%, transparent);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(15px);
+  }
+
+  .product-switcher__heading,
+  .product-choice__topline,
+  .product-choice__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: var(--font-mono);
+  }
+
+  .product-switcher__heading {
+    min-height: 2.8rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 13%, transparent);
+    color: color-mix(in srgb, var(--paper) 45%, transparent);
+    font-size: 0.58rem;
+    letter-spacing: 0.09em;
+  }
+
+  .product-choice {
+    --tone: var(--vibermate-blue);
+    position: relative;
+    display: block;
+    padding: 1.25rem 1.25rem 1.15rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 13%, transparent);
+    color: var(--paper);
+    text-decoration: none;
+    transition: background 180ms ease;
+  }
+
+  .product-choice:last-child {
+    border-bottom: 0;
+  }
+
+  .product-choice::before {
+    position: absolute;
+    top: 1rem;
+    bottom: 1rem;
+    left: -1px;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+    background: var(--tone);
+    content: "";
+    opacity: 0.55;
+    transform: scaleY(0.35);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .product-choice:hover,
+  .product-choice:focus-visible {
+    background: color-mix(in srgb, var(--tone) 10%, transparent);
+  }
+
+  .product-choice:hover::before,
+  .product-choice:focus-visible::before {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  .product-choice__topline {
+    color: color-mix(in srgb, var(--paper) 42%, transparent);
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .product-choice__topline span:last-child {
+    color: var(--tone);
+  }
+
+  .product-choice__identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.8rem;
+    color: var(--tone);
+  }
+
+  .product-choice__identity > div {
+    min-width: 0;
+  }
+
+  .product-choice__identity h2,
+  .product-choice__identity p,
+  .product-choice__summary,
+  .product-choice__footer {
+    margin: 0;
+  }
+
+  .product-choice__identity h2 {
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 640;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .product-choice__identity p {
+    margin-top: 0.25rem;
+    color: color-mix(in srgb, var(--paper) 55%, transparent);
+    font-size: 0.74rem;
+  }
+
+  .product-choice__summary {
+    margin-top: 0.9rem;
+    color: color-mix(in srgb, var(--paper) 72%, transparent);
+    font-size: 0.91rem;
+    line-height: 1.5;
+  }
+
+  .product-choice__footer {
+    margin-top: 1rem;
+    color: color-mix(in srgb, var(--paper) 43%, transparent);
+    font-size: 0.57rem;
+  }
+
+  .product-choice__footer strong {
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+  }
+
+  .product-choice__footer i {
+    display: inline-block;
+    margin-left: 0.22rem;
+    font-style: normal;
+    transition: transform 160ms ease;
+  }
+
+  .product-choice:hover .product-choice__footer i {
+    transform: translate(2px, -2px);
+  }
+
+  .independence-section,
   .principles-section {
-    padding-block: clamp(6rem, 12vw, 10rem);
+    padding-block: clamp(6rem, 11vw, 9rem);
   }
 
-  .products-section {
-    border-block: 1px solid var(--line);
-    background: color-mix(in srgb, var(--surface) 86%, transparent);
+  .independence-section {
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
   }
 
-  .product-list {
-    border-inline: 1px solid var(--line-strong);
+  .independence-section__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+    align-items: end;
+    gap: 4rem;
+  }
+
+  .independence-section h2 {
+    max-width: 11ch;
+    margin: 0.9rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 620;
+    letter-spacing: -0.055em;
+    line-height: 0.92;
+  }
+
+  .independence-section__grid > p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: clamp(1.05rem, 1.7vw, 1.24rem);
+    line-height: 1.65;
   }
 
   .principles-section {
@@ -313,7 +506,6 @@ const structuredData = {
   }
 
   .closing-section__inner {
-    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
     align-items: end;
@@ -334,11 +526,6 @@ const structuredData = {
     line-height: 0.9;
   }
 
-  .closing-section__body {
-    position: relative;
-    z-index: 2;
-  }
-
   .closing-section__body p {
     margin: 0 0 1.8rem;
     color: color-mix(in srgb, var(--paper) 70%, transparent);
@@ -352,37 +539,54 @@ const structuredData = {
     background: var(--paper);
   }
 
-  @media (max-width: 1080px) {
-    .hero__copy {
-      width: min(58%, 39rem);
+  @media (max-width: 980px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
+      padding-block: 5rem;
     }
 
-    h1 {
-      max-width: 11ch;
+    .hero__copy {
+      max-width: 44rem;
+    }
+
+    .product-switcher {
+      max-width: 45rem;
     }
   }
 
   @media (max-width: 760px) {
     .hero {
-      min-height: calc(100svh - 4.25rem);
-      align-items: flex-start;
-      padding-block: 3.75rem 15rem;
-    }
-
-    .hero__copy {
-      width: 100%;
+      padding-block: 3.75rem;
     }
 
     h1 {
       max-width: 100%;
-      font-size: clamp(3.7rem, 17vw, 5.5rem);
+      font-size: clamp(3.15rem, 13.5vw, 4.6rem);
       overflow-wrap: anywhere;
     }
 
+    h1 span,
+    h1 em,
+    .hero__body,
+    .product-choice__topline span,
+    .product-choice__identity h2,
+    .product-choice__identity p,
+    .product-choice__summary,
+    .product-choice__footer span {
+      overflow-wrap: anywhere;
+    }
+
+    .product-switcher__heading,
+    .product-choice__topline,
+    .product-choice__footer {
+      gap: 0.65rem;
+    }
+
     :global(html[lang="zh-CN"]) h1 {
-      font-size: clamp(3.15rem, 14vw, 4.6rem);
+      font-size: clamp(3.05rem, 13vw, 4.5rem);
       letter-spacing: -0.05em;
-      line-height: 0.88;
+      line-height: 0.9;
     }
 
     .hero__actions {
@@ -390,9 +594,15 @@ const structuredData = {
       flex-direction: column;
     }
 
-    .products-section,
+    .independence-section,
     .principles-section {
       padding-block: 5.5rem;
+    }
+
+    .independence-section__grid,
+    .closing-section__inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
     }
 
     .principles-grid {
@@ -410,11 +620,6 @@ const structuredData = {
 
     .principle-label {
       margin-top: 3rem;
-    }
-
-    .closing-section__inner {
-      grid-template-columns: 1fr;
-      gap: 2rem;
     }
 
     .closing-section h2 {
