@@ -66,10 +66,10 @@ const productCatalog: readonly Product[] = [
       "编程 Agent 的流量运行时",
     ),
     status: localized(
-      "macOS + Linux preview · v0.1.1",
-      "macOS + Linux 预览版 · v0.1.1",
+      "macOS + Linux preview · v0.1.12",
+      "macOS + Linux 预览版 · v0.1.12",
     ),
-    version: "0.1.1",
+    version: "0.1.12",
     headline: localized(
       "See every turn. Choose every route.",
       "看清每个 Turn，决定每条去向。",
@@ -95,8 +95,8 @@ const productCatalog: readonly Product[] = [
           "macOS 14+ · Apple 芯片与 Intel",
         ),
         body: localized(
-          "Install one App with the local Runtime included. Start Claude or Codex with the vibermate command, or open the browser address shown under Settings → Team access on the same Mac.",
-          "安装一个已包含本地 Runtime 的 App。用 vibermate 命令启动 Claude 或 Codex，也可在同一台 Mac 上打开“设置 → 团队接入”显示的浏览器地址。",
+          "Install the App with its local Runtime. Set up the Terminal command under Settings → Access & launch, then start Claude or Codex. The same page provides the Web workbench address.",
+          "安装自带本地 Runtime 的 App。在“设置 → 接入与启动”中配置终端命令，再启动 Claude 或 Codex；同一页面也提供 Web 工作台地址。",
         ),
         command: "brew install --cask vibe-agi/tap/vibermate",
       },
@@ -107,15 +107,15 @@ const productCatalog: readonly Product[] = [
           "Linux x86-64 与 ARM64",
         ),
         body: localized(
-          "Extract the matching release archive, start the Runtime, then open the printed address with its owner key. Create one Runtime User per person or device under Settings → Team access.",
-          "解压对应架构的版本包并启动 Runtime，然后用输出的地址和所有者密钥进入网页。在“设置 → 团队接入”中为每个人或设备创建 Runtime User。",
+          "Extract the matching archive and start the Server. Open http://127.0.0.1:9666, then use the setup key from ./vibermated server recovery-key to create your owner login. Local use needs no domain or certificate.",
+          "解压对应架构的压缩包并启动 Server。打开 http://127.0.0.1:9666，用 ./vibermated server recovery-key 获取的初始化密钥创建所有者账号。本机使用无需域名或证书。",
         ),
         command:
-          "./vibermated server --listen 0.0.0.0:9666 --transport self_signed_tls",
+          "./vibermated server",
       },
     ],
     repository: "https://github.com/vibe-agi/vibermate",
-    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.1",
+    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.12",
     features: [
       {
         title: localized("Keep the normal workflow", "保留原来的使用方式"),
@@ -136,6 +136,27 @@ const productCatalog: readonly Product[] = [
         body: localized(
           "Control redaction and retention while keeping provider credentials outside evidence.",
           "明确控制脱敏与保留周期，同时让服务凭据始终留在证据之外。",
+        ),
+      },
+      {
+        title: localized("Manage upstream accounts", "集中管理上游账号"),
+        body: localized(
+          "Use experimental Codex OAuth, import an authorization file, or enter credentials manually. Link accounts to services, add searchable notes, and refresh managed tokens without editing routing policies.",
+          "通过实验性 Codex OAuth、导入授权文件或手动填写添加账号。账号可关联到上游服务、添加可搜索的备注，并独立刷新托管令牌，无需修改流量策略。",
+        ),
+      },
+      {
+        title: localized("Read account quota clearly", "看清账号额度"),
+        body: localized(
+          "Inspect available token metadata and explicitly query upstream quota or account history. These upstream figures stay separate from ViberMate's own traffic statistics.",
+          "查看令牌中的可用资料，按需查询上游额度和账号历史用量。上游数据与 ViberMate 自身的流量统计明确区分。",
+        ),
+      },
+      {
+        title: localized("Choose a deployment that fits", "按场景部署"),
+        body: localized(
+          "Run the native Server or Docker locally without a domain. Remote deployments support private-CA host or IP certificates, automatic HTTPS for public domains, or your existing certificate files.",
+          "本机原生 Server 或 Docker 无需域名。远程部署支持私有 CA 签发的域名或 IP 证书、公网域名自动 HTTPS，以及已有证书文件。",
         ),
       },
     ],
