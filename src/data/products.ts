@@ -66,10 +66,10 @@ const productCatalog: readonly Product[] = [
       "编程 Agent 的流量运行时",
     ),
     status: localized(
-      "macOS + Linux preview · v0.1.12",
-      "macOS + Linux 预览版 · v0.1.12",
+      "macOS + Linux preview · v0.1.13",
+      "macOS + Linux 预览版 · v0.1.13",
     ),
-    version: "0.1.12",
+    version: "0.1.13",
     headline: localized(
       "See every turn. Choose every route.",
       "看清每个 Turn，决定每条去向。",
@@ -115,7 +115,7 @@ const productCatalog: readonly Product[] = [
       },
     ],
     repository: "https://github.com/vibe-agi/vibermate",
-    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.12",
+    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.13",
     features: [
       {
         title: localized("Keep the normal workflow", "保留原来的使用方式"),
@@ -134,8 +134,8 @@ const productCatalog: readonly Product[] = [
       {
         title: localized("Leave useful evidence", "留下真正有用的证据"),
         body: localized(
-          "Control redaction and retention while keeping provider credentials outside evidence.",
-          "明确控制脱敏与保留周期，同时让服务凭据始终留在证据之外。",
+          "Control recording and retention. Recognized credential headers are redacted; captured bodies and query strings still need care.",
+          "明确控制记录与保留周期。已识别的凭据 Header 会脱敏；被记录的正文和查询参数仍需留意。",
         ),
       },
       {
@@ -157,6 +157,20 @@ const productCatalog: readonly Product[] = [
         body: localized(
           "Run the native Server or Docker locally without a domain. Remote deployments support private-CA host or IP certificates, automatic HTTPS for public domains, or your existing certificate files.",
           "本机原生 Server 或 Docker 无需域名。远程部署支持私有 CA 签发的域名或 IP 证书、公网域名自动 HTTPS，以及已有证书文件。",
+        ),
+      },
+      {
+        title: localized("Choose what the Agent inherits", "选择 Agent 继承哪些变量"),
+        body: localized(
+          "Block environment variables by name or add explicit overrides. Launcher snapshots contain names only, including for remote terminals. Changes apply to new launches; filtering is not a sandbox.",
+          "按名称屏蔽环境变量，或添加覆盖值。启动快照只采集变量名，也适用于远程终端。规则对新启动生效；变量过滤并非沙箱。",
+        ),
+      },
+      {
+        title: localized("Know where your data lives", "清楚数据存在哪里"),
+        body: localized(
+          "See the runtime data directory and SQLite path in Settings. The local App can move the complete directory with integrity checks and startup recovery; Web displays the server-side location.",
+          "在设置中查看运行时数据目录和 SQLite 路径。本机 App 可迁移完整目录，并进行校验与启动恢复；Web 明确展示服务器上的位置。",
         ),
       },
     ],
