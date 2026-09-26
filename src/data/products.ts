@@ -66,10 +66,10 @@ const productCatalog: readonly Product[] = [
       "编程 Agent 的流量运行时",
     ),
     status: localized(
-      "macOS + Linux preview · v0.1.13",
-      "macOS + Linux 预览版 · v0.1.13",
+      "macOS + Linux · v0.1.14",
+      "macOS + Linux · v0.1.14",
     ),
-    version: "0.1.13",
+    version: "0.1.14",
     headline: localized(
       "See every turn. Choose every route.",
       "看清每个 Turn，决定每条去向。",
@@ -115,7 +115,7 @@ const productCatalog: readonly Product[] = [
       },
     ],
     repository: "https://github.com/vibe-agi/vibermate",
-    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.13",
+    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.14",
     features: [
       {
         title: localized("Keep the normal workflow", "保留原来的使用方式"),
@@ -127,15 +127,15 @@ const productCatalog: readonly Product[] = [
       {
         title: localized("Route with intent", "按你的逻辑选择去向"),
         body: localized(
-          "Choose an Endpoint, account, model mapping, or a bounded JavaScript selector.",
-          "选择上游服务、账号、模型映射，或者编写受限的 JavaScript 选择器。",
+          "Choose an Endpoint, account, model mapping, or bounded JavaScript selector, then dry-run one synthetic request before publishing.",
+          "选择上游服务、账号、模型映射或受限的 JavaScript 选择器，并在发布前用一条合成请求试跑。",
         ),
       },
       {
         title: localized("Leave useful evidence", "留下真正有用的证据"),
         body: localized(
-          "Control recording and retention. Recognized credential headers are redacted; captured bodies and query strings still need care.",
-          "明确控制记录与保留周期。已识别的凭据 Header 会脱敏；被记录的正文和查询参数仍需留意。",
+          "Search retained metadata, compare HTTP stages, preview redacted diagnostics, and make verified backups. Full recording retains semantic bodies for the configured period.",
+          "搜索已保留的元数据、比较 HTTP 阶段、预览脱敏诊断并创建可验证备份。Full 录制会按配置期限保留语义正文。",
         ),
       },
       {
@@ -155,8 +155,8 @@ const productCatalog: readonly Product[] = [
       {
         title: localized("Choose a deployment that fits", "按场景部署"),
         body: localized(
-          "Run the native Server or Docker locally without a domain. Remote deployments support private-CA host or IP certificates, automatic HTTPS for public domains, or your existing certificate files.",
-          "本机原生 Server 或 Docker 无需域名。远程部署支持私有 CA 签发的域名或 IP 证书、公网域名自动 HTTPS，以及已有证书文件。",
+          "Run the native Server or Docker locally without a domain. Remote deployments support private-CA host or IP certificates, automatic HTTPS, or existing certificates; Owners can deliver revocable proxy logins and the Proxy CA from Web.",
+          "本机原生 Server 或 Docker 无需域名。远程部署支持私有 CA 域名/IP 证书、自动 HTTPS 或已有证书；Owner 可从 Web 交付可撤销的代理登录与 Proxy CA。",
         ),
       },
       {
@@ -171,6 +171,13 @@ const productCatalog: readonly Product[] = [
         body: localized(
           "See the runtime data directory and SQLite path in Settings. The local App can move the complete directory with integrity checks and startup recovery; Web displays the server-side location.",
           "在设置中查看运行时数据目录和 SQLite 路径。本机 App 可迁移完整目录，并进行校验与启动恢复；Web 明确展示服务器上的位置。",
+        ),
+      },
+      {
+        title: localized("Observe ACP editors", "观察 ACP 编辑器"),
+        body: localized(
+          "Experimentally retain bounded ACP session and prompt outcomes through App or Server without pretending HTTP routing and account policy also apply.",
+          "通过 App 或 Server 实验性保留有界的 ACP 会话与 Prompt 结果，并明确说明 HTTP 路由与账号策略不会因此生效。",
         ),
       },
     ],
