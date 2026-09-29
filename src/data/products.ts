@@ -277,8 +277,8 @@ const productCatalog: readonly Product[] = [
       {
         title: localized("Runs on your own network", "在你自己的网络里运行"),
         body: localized(
-          "The server and its web workbench are self-contained: use it on one computer, inside a private network, or over HTTPS on a public domain.",
-          "服务器和 Web 工作台自成一体：可以只在一台电脑上用，也可以在内网里用，或通过公网域名以 HTTPS 访问。",
+          "The server and its web workbench are self-contained: use it on one computer, inside a private network, or over HTTPS on a public domain, and choose which networks may connect with an IP allowlist.",
+          "服务器和 Web 工作台自成一体：可以只在一台电脑上用，也可以在内网里用，或通过公网域名以 HTTPS 访问，并用 IP 白名单决定哪些网络可以连接。",
         ),
       },
       {
