@@ -162,7 +162,7 @@ test("search engines receive truthful site, software, and breadcrumb data", asyn
   assert.deepEqual(homeTypes, new Set(["Organization", "WebSite"]));
 
   for (const [relativePath, name, version, screenshotCount] of [
-    ["products/vibermate/index.html", "ViberMate", "0.1.17", 5],
+    ["products/vibermate/index.html", "ViberMate", "0.1.17", 6],
     ["products/hideout/index.html", "Hideout", "0.1.0-alpha.3", 0],
   ]) {
     const html = await read(relativePath);
@@ -186,17 +186,17 @@ test("search engines receive truthful site, software, and breadcrumb data", asyn
 });
 
 test("ViberMate pages expose a crawlable large social preview", async () => {
-  for (const relativePath of [
-    "products/vibermate/index.html",
-    "zh/products/vibermate/index.html",
+  for (const [relativePath, locale] of [
+    ["products/vibermate/index.html", "en"],
+    ["zh/products/vibermate/index.html", "zh"],
   ]) {
     const html = await read(relativePath);
-    assert.match(
-      html,
-      /<meta property="og:image" content="https:\/\/vibe-agi\.github\.io\/images\/vibermate\/capture-timeline-2400\.webp">/,
+    assert.ok(
+      html.includes(`<meta property="og:image" content="https://vibe-agi.github.io/images/vibermate/conversation-${locale}-2400.webp">`),
+      relativePath,
     );
     assert.match(html, /<meta property="og:image:width" content="2400">/);
-    assert.match(html, /<meta property="og:image:height" content="1341">/);
+    assert.match(html, /<meta property="og:image:height" content="1340">/);
     assert.match(
       html,
       /<meta name="twitter:card" content="summary_large_image">/,
@@ -315,7 +315,7 @@ test("ViberMate release guidance stays current in both languages", async () => {
     const html = await read(relativePath);
     assert.ok(html.includes("v0.1.17"), relativePath);
     assert.ok(html.includes("https://github.com/vibe-agi/vibermate/releases/tag/v0.1.17"), relativePath);
-    assert.ok(html.includes("Codex OAuth"), relativePath);
+    assert.ok(html.includes("vibermate run -- claude"), relativePath);
     assert.ok(html.includes("./vibermated server recovery-key"), relativePath);
     assert.ok(html.includes("http://127.0.0.1:9666"), relativePath);
     assert.doesNotMatch(html, /self_signed_tls|Team access|团队接入/);
@@ -333,39 +333,46 @@ function lossyWebPDimensions(image) {
   };
 }
 
-test("ViberMate's gallery uses responsive, bounded WebP screenshots", async () => {
-  const screenshotNames = [
-    "capture-timeline",
-    "raw-evidence",
-    "traffic-policies",
-    "script-library",
-    "team-insights",
+test("ViberMate's tour uses responsive, bounded WebP screenshots per language", async () => {
+  // Rendered by tool/product-screenshots in the ViberMate repository.
+  const screenshots = [
+    ["conversation", 1340],
+    ["approval", 700],
+    ["routes", 1340],
+    ["accounts", 1340],
+    ["usage", 1340],
+    ["scripts", 1340],
   ];
 
-  for (const name of screenshotNames) {
-    for (const [suffix, width, height, maximumBytes] of [
-      ["1280", 1280, 715, 80_000],
-      ["2400", 2400, 1341, 180_000],
-    ]) {
-      const relativePath = `images/vibermate/${name}-${suffix}.webp`;
-      const filePath = path.join(dist, relativePath);
-      const image = await readFile(filePath);
-      const details = await stat(filePath);
-      assert.deepEqual(lossyWebPDimensions(image), { width, height }, relativePath);
-      assert.ok(details.size > 20_000, `${relativePath} should retain UI detail`);
-      assert.ok(details.size < maximumBytes, `${relativePath} should stay lightweight`);
+  for (const [name, fullHeight] of screenshots) {
+    for (const locale of ["en", "zh"]) {
+      for (const [width, maximumBytes] of [
+        [1280, 80_000],
+        [2400, 180_000],
+      ]) {
+        const relativePath = `images/vibermate/${name}-${locale}-${width}.webp`;
+        const filePath = path.join(dist, relativePath);
+        const image = await readFile(filePath);
+        const details = await stat(filePath);
+        const height = Math.round((fullHeight * width) / 2400);
+        assert.deepEqual(lossyWebPDimensions(image), { width, height }, relativePath);
+        assert.ok(details.size > 10_000, `${relativePath} should retain UI detail`);
+        assert.ok(details.size < maximumBytes, `${relativePath} should stay lightweight`);
+      }
     }
   }
 
-  for (const relativePath of [
-    "products/vibermate/index.html",
-    "zh/products/vibermate/index.html",
+  for (const [relativePath, locale] of [
+    ["products/vibermate/index.html", "en"],
+    ["zh/products/vibermate/index.html", "zh"],
   ]) {
     const html = await read(relativePath);
-    assert.equal((html.match(/<img\b[^>]*\/images\/vibermate\/[^>]*-1280\.webp/g) ?? []).length, 5, relativePath);
-    assert.equal((html.match(/srcset="[^"]*-1280\.webp 1280w, [^"]*-2400\.webp 2400w"/g) ?? []).length, 5, relativePath);
-    assert.equal((html.match(/loading="lazy"/g) ?? []).length, 5, relativePath);
-    assert.match(html, /Deterministic preview data|确定性预览数据/, relativePath);
+    const previews = html.match(/<img\b[^>]*\/images\/vibermate\/[^>]*-1280\.webp/g) ?? [];
+    assert.equal(previews.length, screenshots.length, relativePath);
+    assert.ok(previews.every((tag) => tag.includes(`-${locale}-1280.webp`)), relativePath);
+    assert.equal((html.match(/srcset="[^"]*-1280\.webp 1280w, [^"]*-2400\.webp 2400w"/g) ?? []).length, screenshots.length, relativePath);
+    assert.equal((html.match(/loading="lazy"/g) ?? []).length, screenshots.length, relativePath);
+    assert.match(html, /Sample data|\u793a\u4f8b\u6570\u636e/, relativePath);
   }
 });
 

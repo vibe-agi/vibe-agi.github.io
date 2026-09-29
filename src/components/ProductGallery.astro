@@ -24,13 +24,21 @@ const text = siteCopy[locale];
       </div>
     </header>
 
-    <div class="gallery__grid">
+    <ol class="tour">
       {
         screenshots.map((screenshot, index) => (
-          <figure class:list={["gallery-card", { "gallery-card--lead": index === 0 }]}>
+          <li class="tour-row">
+            <div class="tour-row__text">
+              <p class="tour-row__eyebrow">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                {screenshot.eyebrow[locale]}
+              </p>
+              <h3>{screenshot.title[locale]}</h3>
+              <p>{screenshot.body[locale]}</p>
+            </div>
             <a
               class="gallery-card__image"
-              href={screenshot.src}
+              href={screenshot.src[locale]}
               target="_blank"
               rel="noreferrer"
               aria-label={`${text.pageOpenScreenshot}: ${screenshot.title[locale]}`}
@@ -40,11 +48,9 @@ const text = siteCopy[locale];
                 <b>ViberMate</b>
               </span>
               <img
-                src={screenshot.previewSrc}
-                srcset={`${screenshot.previewSrc} 1280w, ${screenshot.src} 2400w`}
-                sizes={index === 0
-                  ? "(max-width: 760px) calc(100vw - 1.5rem), min(76rem, calc(100vw - 2.5rem))"
-                  : "(max-width: 760px) calc(100vw - 1.5rem), min(37rem, calc(50vw - 2.5rem))"}
+                src={screenshot.previewSrc[locale]}
+                srcset={`${screenshot.previewSrc[locale]} 1280w, ${screenshot.src[locale]} 2400w`}
+                sizes="(max-width: 900px) calc(100vw - 1.5rem), min(52rem, calc(66vw - 2.5rem))"
                 width={screenshot.width}
                 height={screenshot.height}
                 alt={screenshot.alt[locale]}
@@ -53,17 +59,10 @@ const text = siteCopy[locale];
               />
               <span class="gallery-card__open" aria-hidden="true">↗</span>
             </a>
-            <figcaption>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <div>
-                <h3>{screenshot.title[locale]}</h3>
-                <p>{screenshot.body[locale]}</p>
-              </div>
-            </figcaption>
-          </figure>
+          </li>
         ))
       }
-    </div>
+    </ol>
   </div>
 </section>
 
@@ -123,19 +122,58 @@ const text = siteCopy[locale];
     line-height: 1.65;
   }
 
-  .gallery__grid {
+  .tour {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(2rem, 5vw, 4rem) clamp(1.2rem, 3vw, 2.5rem);
-  }
-
-  .gallery-card {
-    min-width: 0;
+    gap: clamp(3.5rem, 8vw, 6.5rem);
     margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .gallery-card--lead {
-    grid-column: 1 / -1;
+  .tour-row {
+    display: grid;
+    grid-template-columns: minmax(15rem, 0.42fr) minmax(0, 1.58fr);
+    align-items: center;
+    gap: clamp(1.8rem, 5vw, 4.5rem);
+  }
+
+  .tour-row:nth-child(even) {
+    grid-template-columns: minmax(0, 1.58fr) minmax(15rem, 0.42fr);
+  }
+
+  .tour-row:nth-child(even) .tour-row__text {
+    order: 2;
+  }
+
+  .tour-row__eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin: 0;
+    color: var(--vibermate-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .tour-row__eyebrow span {
+    color: color-mix(in srgb, var(--paper) 45%, transparent);
+  }
+
+  .tour-row h3 {
+    margin: 0.9rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 2.6vw, 2.35rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+
+  .tour-row__text > p:last-child {
+    margin: 1rem 0 0;
+    color: color-mix(in srgb, var(--paper) 68%, transparent);
+    line-height: 1.65;
   }
 
   .gallery-card__image {
@@ -193,7 +231,8 @@ const text = siteCopy[locale];
     letter-spacing: 0.08em;
   }
 
-  .gallery-card img {
+  .gallery-card__image img {
+    display: block;
     width: 100%;
     height: auto;
   }
@@ -222,62 +261,19 @@ const text = siteCopy[locale];
     transform: translateY(0);
   }
 
-  figcaption {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 1rem;
-    padding-top: 1.2rem;
-  }
-
-  figcaption > span {
-    padding-top: 0.25rem;
-    color: var(--vibermate-cyan);
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-  }
-
-  figcaption h3 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: clamp(1.35rem, 2vw, 1.8rem);
-    font-weight: 580;
-    letter-spacing: -0.025em;
-  }
-
-  figcaption p {
-    max-width: 48rem;
-    margin: 0.45rem 0 0;
-    color: color-mix(in srgb, var(--paper) 62%, transparent);
-    line-height: 1.55;
-  }
-
-  .gallery-card--lead figcaption {
-    grid-template-columns: auto minmax(15rem, 0.65fr) minmax(18rem, 1.35fr);
-  }
-
-  .gallery-card--lead figcaption p {
-    margin-top: 0.1rem;
-  }
-
-  @media (max-width: 760px) {
+  @media (max-width: 900px) {
     .gallery__heading,
-    .gallery__grid {
+    .tour-row,
+    .tour-row:nth-child(even) {
       grid-template-columns: 1fr;
     }
 
-    .gallery-card--lead {
-      grid-column: auto;
+    .tour-row:nth-child(even) .tour-row__text {
+      order: 0;
     }
+  }
 
-    .gallery-card--lead figcaption {
-      grid-template-columns: auto minmax(0, 1fr);
-    }
-
-    .gallery-card--lead figcaption p {
-      grid-column: 2;
-      margin-top: 0.45rem;
-    }
-
+  @media (max-width: 760px) {
     .gallery-card__chrome {
       min-height: 1.65rem;
     }
