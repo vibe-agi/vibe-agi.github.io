@@ -110,10 +110,10 @@ const productCatalog: readonly Product[] = [
       "给使用 Claude Code 或 Codex 的人",
     ),
     status: localized(
-      "macOS + Linux · v0.1.18",
-      "macOS + Linux · v0.1.18",
+      "macOS + Linux · v0.1.19",
+      "macOS + Linux · v0.1.19",
     ),
-    version: "0.1.18",
+    version: "0.1.19",
     headline: localized(
       "See and steer your coding agent.",
       "看清并掌控你的 AI 编程助手。",
@@ -243,7 +243,7 @@ const productCatalog: readonly Product[] = [
       },
     ],
     repository: "https://github.com/vibe-agi/vibermate",
-    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.18",
+    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.19",
     featuresLabel: localized("Good to know", "值得了解"),
     features: [
       {
