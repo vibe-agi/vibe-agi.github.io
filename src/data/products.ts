@@ -66,10 +66,10 @@ const productCatalog: readonly Product[] = [
       "编程 Agent 的流量运行时",
     ),
     status: localized(
-      "macOS + Linux · v0.1.14",
-      "macOS + Linux · v0.1.14",
+      "macOS + Linux · v0.1.17",
+      "macOS + Linux · v0.1.17",
     ),
-    version: "0.1.14",
+    version: "0.1.17",
     headline: localized(
       "See every turn. Choose every route.",
       "看清每个 Turn，决定每条去向。",
@@ -115,7 +115,7 @@ const productCatalog: readonly Product[] = [
       },
     ],
     repository: "https://github.com/vibe-agi/vibermate",
-    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.14",
+    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.17",
     features: [
       {
         title: localized("Keep the normal workflow", "保留原来的使用方式"),
