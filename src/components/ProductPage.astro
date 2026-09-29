@@ -40,7 +40,7 @@ const organizationId = `${siteUrl}#organization`;
 const leadScreenshot = product.screenshots?.[0];
 const socialImage = leadScreenshot
   ? {
-      src: leadScreenshot.src,
+      src: leadScreenshot.src[locale],
       alt: leadScreenshot.alt[locale],
       width: leadScreenshot.width,
       height: leadScreenshot.height,
@@ -77,9 +77,9 @@ const structuredData = {
       sameAs: [product.repository, product.release],
       ...(product.screenshots
         ? {
-            image: new URL(product.screenshots[0].src, Astro.site).href,
+            image: new URL(product.screenshots[0].src[locale], Astro.site).href,
             screenshot: product.screenshots.map((entry) =>
-              new URL(entry.src, Astro.site).href),
+              new URL(entry.src[locale], Astro.site).href),
           }
         : {}),
     },
@@ -131,16 +131,75 @@ const structuredData = {
         <h2>{product.headline[locale]}</h2>
         <p class="product-summary">{product.summary[locale]}</p>
         <div class="product-hero__actions">
-          <a class="button" href={product.repository}>
-            {text.pageSource}<span class="button__arrow" aria-hidden="true">↗</span>
-          </a>
-          <a class="button button--secondary" href={product.release}>
-            {text.pageRelease}<span class="button__arrow" aria-hidden="true">↗</span>
-          </a>
+          {
+            product.start ? (
+              <>
+                <a class="button" href="#start">
+                  {text.pageStart}<span class="button__arrow" aria-hidden="true">↓</span>
+                </a>
+                <a class="button button--secondary" href={product.repository}>
+                  {text.pageSource}<span class="button__arrow" aria-hidden="true">↗</span>
+                </a>
+              </>
+            ) : (
+              <>
+                <a class="button" href={product.repository}>
+                  {text.pageSource}<span class="button__arrow" aria-hidden="true">↗</span>
+                </a>
+                <a class="button button--secondary" href={product.release}>
+                  {text.pageRelease}<span class="button__arrow" aria-hidden="true">↗</span>
+                </a>
+              </>
+            )
+          }
         </div>
       </div>
       <BoundaryDiagram product={product} locale={locale} />
     </section>
+
+    {
+      product.intro && (
+        <section class="intro-section shell" aria-labelledby="intro-title">
+          <p class="eyebrow">{text.pageIntro}</p>
+          <div class="intro-section__lead">
+            <h2 id="intro-title">{product.intro.title[locale]}</h2>
+            <p>{product.intro.body[locale]}</p>
+          </div>
+          <ol class="step-grid">
+            {
+              product.intro.steps.map((step, index) => (
+                <li>
+                  <span>0{index + 1}</span>
+                  <h3>{step.title[locale]}</h3>
+                  <p>{step.body[locale]}</p>
+                  {step.command && <code>{step.command}</code>}
+                </li>
+              ))
+            }
+          </ol>
+        </section>
+      )
+    }
+
+    {
+      product.audiences && (
+        <section class="audience-section" aria-labelledby="audience-title">
+          <div class="shell">
+            <p id="audience-title" class="eyebrow">{text.pageAudiences}</p>
+            <div class="audience-grid">
+              {
+                product.audiences.map((audience) => (
+                  <article>
+                    <h3>{audience.title[locale]}</h3>
+                    <p>{audience.body[locale]}</p>
+                  </article>
+                ))
+              }
+            </div>
+          </div>
+        </section>
+      )
+    }
 
     {
       product.screenshots && (
@@ -148,15 +207,26 @@ const structuredData = {
       )
     }
 
-    <section class="install-section">
+    <section id="start" class="install-section">
       <div class="shell">
         <header class="install-section__heading">
           <div>
-          <p class="eyebrow">{text.pageInstall}</p>
-          <h2>{product.name}</h2>
+          <p class="eyebrow">{product.start ? text.pageStart : text.pageInstall}</p>
+          <h2>{product.start ? text.pageStartTitle : product.name}</h2>
           </div>
-          <p>{text.pagePlatform}: <strong>{product.platform[locale]}</strong></p>
+          <p>
+            {text.pagePlatform}: <strong>{product.platform[locale]}</strong>
+            {product.start && (
+              <>
+                {" · "}
+                <a class="install-section__release" href={product.release}>
+                  {text.pageRelease} {product.version}<span aria-hidden="true"> ↗</span>
+                </a>
+              </>
+            )}
+          </p>
         </header>
+        {product.start && <p class="install-step">01 · {text.pageStepInstall}</p>}
         <div class="setup-paths">
           {
             setupPaths.map((path) => (
@@ -171,21 +241,28 @@ const structuredData = {
             ))
           }
         </div>
+        {
+          product.start?.map((step, index) => (
+            <>
+              <p class="install-step">0{index + 2} · {step.title[locale]}</p>
+              <div class="setup-paths">
+                <article class="setup-path">
+                  <div>
+                    <p>{step.body[locale]}</p>
+                  </div>
+                  {step.command && <InstallCommand locale={locale} command={step.command} />}
+                </article>
+              </div>
+            </>
+          ))
+        }
       </div>
-    </section>
-
-    <section class="boundary-section shell">
-      <div class="boundary-section__label">
-        <p class="eyebrow">{text.pageBoundary}</p>
-        <span>{product.index} / {String(products.length).padStart(2, "0")}</span>
-      </div>
-      <p class="boundary-section__statement">{product.boundary[locale]}</p>
     </section>
 
     <section class="capabilities-section">
       <div class="shell">
         <div class="capabilities-section__heading">
-          <p class="eyebrow">{text.pageCapabilities}</p>
+          <p class="eyebrow">{product.featuresLabel?.[locale] ?? text.pageCapabilities}</p>
           <span>{product.role[locale]}</span>
         </div>
         <div class="capabilities-grid">
@@ -201,6 +278,33 @@ const structuredData = {
         </div>
       </div>
     </section>
+
+    <section class="boundary-section shell">
+      <div class="boundary-section__label">
+        <p class="eyebrow">{product.boundaryLabel?.[locale] ?? text.pageBoundary}</p>
+        <span>{product.index} / {String(products.length).padStart(2, "0")}</span>
+      </div>
+      <p class="boundary-section__statement">{product.boundary[locale]}</p>
+    </section>
+
+    {
+      product.links && (
+        <section class="links-section shell" aria-labelledby="links-title">
+          <p id="links-title" class="eyebrow">{text.pageLinks}</p>
+          <ul>
+            {
+              product.links.map((link) => (
+                <li>
+                  <a href={link.href[locale]}>
+                    {link.label[locale]}<span aria-hidden="true">↗</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      )
+    }
 
     <a class:list={["next-product", `tone-${nextProduct.tone}`]} href={productHref(nextProduct, locale)}>
       <div class="shell next-product__inner">
@@ -510,6 +614,152 @@ const structuredData = {
     transform: translateX(0.5rem);
   }
 
+  .intro-section {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: clamp(5rem, 10vw, 8rem);
+  }
+
+  .intro-section__lead {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+    align-items: end;
+    gap: clamp(2rem, 6vw, 5rem);
+  }
+
+  .intro-section h2 {
+    max-width: 18ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.3rem, 4.6vw, 4.4rem);
+    font-weight: 580;
+    letter-spacing: -0.05em;
+    line-height: 1;
+  }
+
+  .intro-section__lead p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .step-grid,
+  .audience-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line-strong);
+    list-style: none;
+  }
+
+  .step-grid li,
+  .audience-grid article {
+    padding: 1.5rem 1.8rem 2rem;
+    border-right: 1px solid var(--line-strong);
+  }
+
+  .step-grid li:first-child,
+  .audience-grid article:first-child {
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .step-grid span {
+    color: var(--tone);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+  }
+
+  .step-grid h3,
+  .audience-grid h3 {
+    margin: 2rem 0 0.8rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+
+  .step-grid code {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.4rem;
+    color: var(--paper);
+    background: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+
+  .step-grid p,
+  .audience-grid p {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  .audience-section {
+    padding-block: clamp(4rem, 8vw, 6rem);
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+  }
+
+  .audience-section .eyebrow {
+    margin-bottom: 2rem;
+  }
+
+  .audience-grid h3 {
+    margin-top: 0.4rem;
+  }
+
+  .install-section__release {
+    color: var(--paper);
+  }
+
+  .install-step {
+    margin: 2.5rem 0 0;
+    color: var(--tone);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+  }
+
+  .install-step + .setup-paths {
+    margin-top: 0.9rem;
+  }
+
+  .links-section {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.45fr) minmax(20rem, 1.55fr);
+    gap: 4rem;
+    padding-block: 0 clamp(5rem, 9vw, 7rem);
+  }
+
+  .links-section ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.2rem 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links-section a {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--ink);
+    font-size: 1.05rem;
+    text-decoration: none;
+  }
+
+  .links-section a:hover span {
+    color: var(--tone);
+  }
+
   @media (max-width: 1000px) {
     .product-hero {
       grid-template-columns: 1fr;
@@ -536,8 +786,29 @@ const structuredData = {
 
     .install-section__heading,
     .setup-path,
-    .boundary-section {
+    .boundary-section,
+    .intro-section__lead,
+    .links-section,
+    .links-section ul {
       grid-template-columns: 1fr;
+    }
+
+    .links-section {
+      gap: 1.5rem;
+    }
+
+    .step-grid,
+    .audience-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .step-grid li,
+    .step-grid li:first-child,
+    .audience-grid article,
+    .audience-grid article:first-child {
+      border-right: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+      border-left: 1px solid var(--line-strong);
     }
 
     .boundary-section {

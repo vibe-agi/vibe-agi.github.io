@@ -16,8 +16,9 @@ export interface ProductDiagram {
 }
 
 export interface ProductScreenshot {
-  src: string;
-  previewSrc: string;
+  src: LocalizedText;
+  previewSrc: LocalizedText;
+  eyebrow: LocalizedText;
   title: LocalizedText;
   body: LocalizedText;
   alt: LocalizedText;
@@ -32,6 +33,23 @@ export interface ProductSetupPath {
   command: string;
 }
 
+export interface ProductStep {
+  title: LocalizedText;
+  body: LocalizedText;
+  command?: string;
+}
+
+export interface ProductLink {
+  label: LocalizedText;
+  href: LocalizedText;
+}
+
+export interface ProductIntro {
+  title: LocalizedText;
+  body: LocalizedText;
+  steps: readonly ProductStep[];
+}
+
 export interface Product {
   slug: "vibermate" | "hideout";
   index: string;
@@ -43,17 +61,43 @@ export interface Product {
   headline: LocalizedText;
   summary: LocalizedText;
   boundary: LocalizedText;
+  boundaryLabel?: LocalizedText;
+  intro?: ProductIntro;
+  audiences?: readonly ProductFeature[];
   platform: LocalizedText;
   install: string;
   setupPaths?: readonly ProductSetupPath[];
+  start?: readonly ProductStep[];
   repository: string;
   release: string;
+  featuresLabel?: LocalizedText;
   features: readonly ProductFeature[];
+  links?: readonly ProductLink[];
   diagram: ProductDiagram;
   screenshots?: readonly ProductScreenshot[];
 }
 
 const localized = (en: string, zh: string): LocalizedText => ({ en, zh });
+
+// Screenshots are rendered per language by tool/product-screenshots in the
+// ViberMate repository, 2400 pixels wide with a 1280 pixel preview.
+const screenshot = (
+  name: string,
+  height: number,
+  text: Pick<ProductScreenshot, "eyebrow" | "title" | "body" | "alt">,
+): ProductScreenshot => ({
+  src: localized(
+    `/images/vibermate/${name}-en-2400.webp`,
+    `/images/vibermate/${name}-zh-2400.webp`,
+  ),
+  previewSrc: localized(
+    `/images/vibermate/${name}-en-1280.webp`,
+    `/images/vibermate/${name}-zh-1280.webp`,
+  ),
+  width: 2400,
+  height,
+  ...text,
+});
 
 const productCatalog: readonly Product[] = [
   {
@@ -62,8 +106,8 @@ const productCatalog: readonly Product[] = [
     name: "ViberMate",
     tone: "vibermate",
     role: localized(
-      "Traffic runtime for coding agents",
-      "编程 Agent 的流量运行时",
+      "For people who use Claude Code or Codex",
+      "给使用 Claude Code 或 Codex 的人",
     ),
     status: localized(
       "macOS + Linux · v0.1.17",
@@ -71,16 +115,83 @@ const productCatalog: readonly Product[] = [
     ),
     version: "0.1.17",
     headline: localized(
-      "See every turn. Choose every route.",
-      "看清每个 Turn，决定每条去向。",
+      "See and steer your coding agent.",
+      "看清并掌控你的 AI 编程助手。",
     ),
     summary: localized(
-      "See and control how Claude Code and Codex CLI connect to AI services.",
-      "看清并控制 Claude Code 和 Codex CLI 如何连接 AI 服务。",
+      "ViberMate sits between Claude Code or Codex and the AI service. It records each conversation, lets you choose which account answers, can ask you before the agent reaches somewhere new, and adds up tokens and cost, on your Mac or on one server for your team.",
+      "ViberMate 位于 Claude Code、Codex 与 AI 服务之间：记录每一段对话，由你决定哪个账号来应答，Agent 访问新地址前可以先问你，并统计 Token 与费用。可以装在你的 Mac 上，也可以部署一台服务器给整个团队用。",
     ),
+    intro: {
+      title: localized(
+        "A dashcam and a steering wheel for your coding agent.",
+        "AI 编程助手的行车记录仪和方向盘。",
+      ),
+      body: localized(
+        "Claude Code and Codex talk to an AI service over the network. Normally you can't see those messages or decide where they go. ViberMate stands in the middle, and you keep using your agent exactly as before.",
+        "Claude Code 和 Codex 通过网络与 AI 服务对话，平时你既看不到这些消息，也决定不了它们发往哪里。ViberMate 站在两者之间，而你照常使用编程助手，什么都不用改。",
+      ),
+      steps: [
+        {
+          title: localized(
+            "Start your agent through ViberMate",
+            "通过 ViberMate 启动编程助手",
+          ),
+          body: localized(
+            "Use this instead of your usual command; for Codex, end it with codex. Your agent, account and settings stay the same.",
+            "用它代替平时的启动命令；使用 Codex 时把结尾换成 codex。编程助手、账号和设置都保持不变。",
+          ),
+          command: "vibermate run -- claude",
+        },
+        {
+          title: localized(
+            "Every request passes through it",
+            "每个请求都经过 ViberMate",
+          ),
+          body: localized(
+            "ViberMate runs on your Mac or your team's server. It records what goes back and forth and applies the rules you set.",
+            "ViberMate 运行在你的 Mac 或团队服务器上，记录往来的内容，并执行你设定的规则。",
+          ),
+        },
+        {
+          title: localized(
+            "Open the workbench",
+            "打开工作台",
+          ),
+          body: localized(
+            "Read each conversation, switch accounts, approve new connections, and check usage and cost, in the App or a browser.",
+            "在 App 或浏览器里查看每段对话、切换账号、审批新的连接、查看用量与费用。",
+          ),
+        },
+      ],
+    },
+    audiences: [
+      {
+        title: localized("Developers", "个人开发者"),
+        body: localized(
+          "See exactly what your agent sent and received, and keep a searchable history of every session.",
+          "看清编程助手到底发出和收到了什么，并保留每次会话的可搜索记录。",
+        ),
+      },
+      {
+        title: localized("People with several accounts", "有多个账号的人"),
+        body: localized(
+          "Send requests to the account or service you choose, see each account's remaining quota, and switch without editing config files.",
+          "把请求发给你选定的账号或服务，查看每个账号的剩余额度，切换时不用改配置文件。",
+        ),
+      },
+      {
+        title: localized("Teams", "团队"),
+        body: localized(
+          "Run one server for everyone. Each person signs in with their own account; the owner decides who may use which policies and sees usage by person, project and model.",
+          "一台服务器全员共用。每人用自己的账号登录，所有者决定谁能使用哪些策略，并按人员、项目和模型查看用量。",
+        ),
+      },
+    ],
+    boundaryLabel: localized("What it is not", "它不是什么"),
     boundary: localized(
-      "ViberMate owns the boundary between a coding agent and its AI provider. The macOS App and Linux Web Runtime expose the same capture, routing, account, message-rule, and evidence model to one or many Runtime Users.",
-      "ViberMate 管理编程 Agent 与 AI 服务之间的边界。macOS App 与 Linux Web Runtime 为一个或多个 Runtime User 提供相同的捕获、路由、账号、消息规则和证据模型。",
+      "ViberMate is not an AI agent or a model provider. It only sees traffic that goes through it, and it never sends your data to a service of its own.",
+      "ViberMate 不是 AI 编程助手，也不是模型服务商。它只能看到经过它的流量，也从不把你的数据发往它自己的服务。",
     ),
     platform: localized(
       "macOS 14+ App · Linux x86-64/ARM64 Server + Web",
@@ -95,195 +206,220 @@ const productCatalog: readonly Product[] = [
           "macOS 14+ · Apple 芯片与 Intel",
         ),
         body: localized(
-          "Install the App with its local Runtime. Set up the Terminal command under Settings → Access & launch, then start Claude or Codex. The same page provides the Web workbench address.",
-          "安装自带本地 Runtime 的 App。在“设置 → 接入与启动”中配置终端命令，再启动 Claude 或 Codex；同一页面也提供 Web 工作台地址。",
+          "For using ViberMate on your own Mac. The App includes everything it needs.",
+          "在自己的 Mac 上使用。App 自带运行所需的一切。",
         ),
         command: "brew install --cask vibe-agi/tap/vibermate",
       },
       {
-        title: localized("Linux Server + Web", "Linux Server + Web"),
+        title: localized("Linux server", "Linux 服务器"),
         platform: localized(
           "Linux x86-64 and ARM64",
           "Linux x86-64 与 ARM64",
         ),
         body: localized(
-          "Extract the matching archive and start the Server. Open http://127.0.0.1:9666, then use the setup key from ./vibermated server recovery-key to create your owner login. Local use needs no domain or certificate.",
-          "解压对应架构的压缩包并启动 Server。打开 http://127.0.0.1:9666，用 ./vibermated server recovery-key 获取的初始化密钥创建所有者账号。本机使用无需域名或证书。",
+          "For a team, or to use ViberMate from a browser. Download the archive from the release page, extract it, start the server, and open http://127.0.0.1:9666. The key for the first owner account comes from ./vibermated server recovery-key.",
+          "给团队使用，或想在浏览器里使用时选择。从版本页面下载压缩包，解压后启动服务器，打开 http://127.0.0.1:9666；第一个所有者账号所需的密钥由 ./vibermated server recovery-key 给出。",
         ),
-        command:
-          "./vibermated server",
+        command: "./vibermated server",
+      },
+    ],
+    start: [
+      {
+        title: localized("Connect your terminal", "接入终端"),
+        body: localized(
+          "In the App, open Settings → Access & launch → Terminal command and set up the vibermate command. With a server, sign in once instead.",
+          "在 App 中打开“设置 → 接入与启动 → 终端命令”，设置好 vibermate 命令。使用服务器时，改为登录一次即可。",
+        ),
+        command: "vibermate login --server http://127.0.0.1:9666",
+      },
+      {
+        title: localized("Start your agent", "启动编程助手"),
+        body: localized(
+          "Run it from your project. Add --server <address> when you use a server. Then open the workbench to watch the conversation arrive.",
+          "在项目目录运行。使用服务器时加上 --server <地址>。然后打开工作台，看对话实时出现。",
+        ),
+        command: "vibermate run -- claude",
       },
     ],
     repository: "https://github.com/vibe-agi/vibermate",
     release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.17",
+    featuresLabel: localized("Good to know", "值得了解"),
     features: [
       {
-        title: localized("Keep the normal workflow", "保留原来的使用方式"),
+        title: localized("Your agent works as before", "编程助手照常工作"),
         body: localized(
-          "Launch Claude Code or Codex from Terminal and inspect the same run in the macOS App or Web workbench.",
-          "从终端启动 Claude Code 或 Codex，再在 macOS App 或 Web 工作台查看同一次运行。",
+          "ViberMate doesn't replace Claude Code, Codex or your AI provider. Without your own policy it records traffic and passes it through unchanged.",
+          "ViberMate 不替代 Claude Code、Codex 或你的 AI 服务商。没有设置自己的策略时，它只记录流量，原样转发。",
         ),
       },
       {
-        title: localized("Route with intent", "按你的逻辑选择去向"),
+        title: localized("Your data stays with you", "数据留在你手里"),
         body: localized(
-          "Choose an Endpoint, account, model mapping, or bounded JavaScript selector, then dry-run one synthetic request before publishing.",
-          "选择上游服务、账号、模型映射或受限的 JavaScript 选择器，并在发布前用一条合成请求试跑。",
+          "Records live in a database on your Mac or your server. There is no ViberMate cloud, and you choose what is recorded and for how long.",
+          "记录保存在你的 Mac 或服务器上的数据库里。ViberMate 没有云服务；记录什么、保留多久由你决定。",
         ),
       },
       {
-        title: localized("Leave useful evidence", "留下真正有用的证据"),
+        title: localized("Credentials stay out of records", "凭据不进记录"),
         body: localized(
-          "Search retained metadata, compare HTTP stages, preview redacted diagnostics, and make verified backups. Full recording retains semantic bodies for the configured period.",
-          "搜索已保留的元数据、比较 HTTP 阶段、预览脱敏诊断并创建可验证备份。Full 录制会按配置期限保留语义正文。",
+          "API keys and sign-in tokens are stored separately and are never written into policies or recorded conversations.",
+          "API Key 和登录令牌单独保存，不会写进策略或记录下来的对话。",
         ),
       },
       {
-        title: localized("Manage upstream accounts", "集中管理上游账号"),
+        title: localized("Numbers you can trust", "数字说真话"),
         body: localized(
-          "Use experimental Codex OAuth, import an authorization file, or enter credentials manually. Link accounts to services, add searchable notes, and refresh managed tokens without editing routing policies.",
-          "通过实验性 Codex OAuth、导入授权文件或手动填写添加账号。账号可关联到上游服务、添加可搜索的备注，并独立刷新托管令牌，无需修改流量策略。",
+          "Token counts come from what the provider reports, and costs are labelled as estimates. Missing data is shown as missing, never guessed.",
+          "Token 数来自服务商的返回，费用明确标为估算。缺少的数据就显示为缺少，从不猜测。",
         ),
       },
       {
-        title: localized("Read account quota clearly", "看清账号额度"),
+        title: localized("Runs on your own network", "在你自己的网络里运行"),
         body: localized(
-          "Inspect available token metadata and explicitly query upstream quota or account history. These upstream figures stay separate from ViberMate's own traffic statistics.",
-          "查看令牌中的可用资料，按需查询上游额度和账号历史用量。上游数据与 ViberMate 自身的流量统计明确区分。",
+          "The server and its web workbench are self-contained: use it on one computer, inside a private network, or over HTTPS on a public domain.",
+          "服务器和 Web 工作台自成一体：可以只在一台电脑上用，也可以在内网里用，或通过公网域名以 HTTPS 访问。",
         ),
       },
       {
-        title: localized("Choose a deployment that fits", "按场景部署"),
+        title: localized("Scripts for special cases", "特殊需求用脚本"),
         body: localized(
-          "Run the native Server or Docker locally without a domain. Remote deployments support private-CA host or IP certificates, automatic HTTPS, or existing certificates; Owners can deliver revocable proxy logins and the Proxy CA from Web.",
-          "本机原生 Server 或 Docker 无需域名。远程部署支持私有 CA 域名/IP 证书、自动 HTTPS 或已有证书；Owner 可从 Web 交付可撤销的代理登录与 Proxy CA。",
+          "Small JavaScript rules can hide personal details or block leaked secrets. They run in a sandbox with no network or file access.",
+          "简短的 JavaScript 规则可以隐藏个人信息、拦截泄露的密钥。它们运行在沙箱中，无法访问网络或文件。",
+        ),
+      },
+    ],
+    links: [
+      {
+        label: localized("Deployment and HTTPS", "部署与 HTTPS"),
+        href: localized(
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/deployment.md",
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/deployment.zh-CN.md",
         ),
       },
       {
-        title: localized("Choose what the Agent inherits", "选择 Agent 继承哪些变量"),
-        body: localized(
-          "Block environment variables by name or add explicit overrides. Launcher snapshots contain names only, including for remote terminals. Changes apply to new launches; filtering is not a sandbox.",
-          "按名称屏蔽环境变量，或添加覆盖值。启动快照只采集变量名，也适用于远程终端。规则对新启动生效；变量过滤并非沙箱。",
+        label: localized("Docker", "Docker"),
+        href: localized(
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/docker.md",
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/docker.zh-CN.md",
         ),
       },
       {
-        title: localized("Know where your data lives", "清楚数据存在哪里"),
-        body: localized(
-          "See the runtime data directory and SQLite path in Settings. The local App can move the complete directory with integrity checks and startup recovery; Web displays the server-side location.",
-          "在设置中查看运行时数据目录和 SQLite 路径。本机 App 可迁移完整目录，并进行校验与启动恢复；Web 明确展示服务器上的位置。",
+        label: localized("Backup and restore", "备份与恢复"),
+        href: localized(
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/backup-and-restore.md",
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/backup-and-restore.zh-CN.md",
         ),
       },
       {
-        title: localized("Observe ACP editors", "观察 ACP 编辑器"),
-        body: localized(
-          "Experimentally retain bounded ACP session and prompt outcomes through App or Server without pretending HTTP routing and account policy also apply.",
-          "通过 App 或 Server 实验性保留有界的 ACP 会话与 Prompt 结果，并明确说明 HTTP 路由与账号策略不会因此生效。",
+        label: localized("What is supported today", "当前支持范围"),
+        href: localized(
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/capability-support.md",
+          "https://github.com/vibe-agi/vibermate/blob/main/docs/capability-support.md",
+        ),
+      },
+      {
+        label: localized("Security policy", "安全策略"),
+        href: localized(
+          "https://github.com/vibe-agi/vibermate/blob/main/SECURITY.md",
+          "https://github.com/vibe-agi/vibermate/blob/main/SECURITY.md",
         ),
       },
     ],
     diagram: {
-      label: localized("One visible request path", "一条看得见的请求路径"),
+      label: localized("Where ViberMate sits", "ViberMate 在哪里"),
       nodes: [
         localized("Claude / Codex", "Claude / Codex"),
-        localized("ViberMate policy", "ViberMate 策略"),
-        localized("AI provider", "AI 服务"),
+        localized("ViberMate", "ViberMate"),
+        localized("AI service", "AI 服务"),
       ],
       caption: localized(
-        "Capture → decide → send, with one Turn of shared context.",
-        "捕获 → 决策 → 发送，并用同一个 Turn Context 串联前后。",
+        "Your agent → ViberMate records and decides → the AI service you choose.",
+        "编程助手 → ViberMate 记录并决定去向 → 你选定的 AI 服务。",
       ),
     },
     screenshots: [
-      {
-        src: "/images/vibermate/capture-timeline-2400.webp",
-        previewSrc: "/images/vibermate/capture-timeline-1280.webp",
-        title: localized(
-          "Follow one Capture, Turn by Turn",
-          "沿着一次 Capture，逐个查看 Turn",
-        ),
+      screenshot("conversation", 1340, {
+        eyebrow: localized("See", "看清"),
+        title: localized("Every conversation, turn by turn", "逐轮看清每段对话"),
         body: localized(
-          "Keep the conversation, frozen routing decision, model request, and outcome in one readable timeline.",
-          "把对话、冻结的路由决策、模型请求与结果放在同一条清晰时间线上。",
+          "Each session shows what you asked, what the model answered, which tools it used, and which account and model handled it. The raw request is one click away.",
+          "每次会话都能看到你问了什么、模型答了什么、用了哪些工具，以及由哪个账号和模型处理。原始请求一点即开。",
         ),
         alt: localized(
-          "ViberMate Capture view showing Claude Code and Codex conversations as a Turn timeline",
-          "ViberMate 捕获视图，以 Turn 时间线展示 Claude Code 与 Codex 对话",
+          "A Claude Code session in ViberMate with its conversation shown turn by turn",
+          "ViberMate 中按轮次展示的一次 Claude Code 会话",
         ),
-        width: 2400,
-        height: 1341,
-      },
-      {
-        src: "/images/vibermate/raw-evidence-2400.webp",
-        previewSrc: "/images/vibermate/raw-evidence-1280.webp",
+      }),
+      screenshot("approval", 700, {
+        eyebrow: localized("Approve", "审批"),
         title: localized(
-          "Inspect the evidence behind a Turn",
-          "检查一个 Turn 背后的证据",
+          "Decide before your agent goes somewhere new",
+          "Agent 去新地方之前，先由你决定",
         ),
         body: localized(
-          "Open retained HTTP boundaries only when needed, with redacted diagnostics and exact test samples close at hand.",
-          "需要时再展开保留的 HTTP 边界，并随手复制脱敏诊断或精确测试样本。",
+          "When the agent tries to reach a site your policy hasn't decided, ViberMate holds the connection and asks. Allow it once, refuse it, or save a rule.",
+          "当 Agent 想访问策略里尚未决定的网站时，ViberMate 会先拦住连接并询问你：本次允许、本次拒绝，或者保存为规则。",
         ),
         alt: localized(
-          "Expanded ViberMate Turn showing frozen routing evidence and retained raw HTTP boundaries",
-          "展开后的 ViberMate Turn，显示冻结路由证据与保留的原始 HTTP 边界",
+          "A pending network access approval for github.com in ViberMate",
+          "ViberMate 中一条待审批的 github.com 网络访问请求",
         ),
-        width: 2400,
-        height: 1341,
-      },
-      {
-        src: "/images/vibermate/traffic-policies-2400.webp",
-        previewSrc: "/images/vibermate/traffic-policies-1280.webp",
+      }),
+      screenshot("routes", 1340, {
+        eyebrow: localized("Steer", "掌控去向"),
         title: localized(
-          "Make every route explicit",
-          "让每条路由都有明确规则",
+          "Choose which account and service answers",
+          "决定由哪个账号和服务应答",
         ),
         body: localized(
-          "Bind client protocols and origins to the intended upstream service, account, and policy revision.",
-          "把客户端协议与来源明确绑定到目标上游服务、账号和策略版本。",
+          "A traffic policy connects each agent to an upstream service and account. Change it here, and running sessions follow on their next request.",
+          "流量策略把每个编程助手连到一个上游服务和账号。在这里修改后，正在运行的会话从下一个请求起生效。",
         ),
         alt: localized(
-          "ViberMate Traffic policies view with Anthropic, OpenAI, and ChatGPT client routes",
-          "ViberMate 流量策略视图，展示 Anthropic、OpenAI 与 ChatGPT 客户端路由",
+          "The Work traffic policy routing Anthropic and OpenAI requests to chosen accounts",
+          "Work 流量策略把 Anthropic 与 OpenAI 请求路由到选定的账号",
         ),
-        width: 2400,
-        height: 1341,
-      },
-      {
-        src: "/images/vibermate/script-library-2400.webp",
-        previewSrc: "/images/vibermate/script-library-1280.webp",
+      }),
+      screenshot("accounts", 1340, {
+        eyebrow: localized("Accounts", "账号"),
         title: localized(
-          "Turn JavaScript into reusable policy",
-          "把 JavaScript 变成可复用策略",
+          "All your upstream accounts in one place",
+          "所有上游账号集中管理",
         ),
         body: localized(
-          "Start from readable built-ins, edit in a bounded sandbox, and test before creating a saved copy.",
-          "从可读的内置示例开始，在受限沙箱中修改并测试，再决定是否保存副本。",
+          "Add API keys, or sign in to Codex with ChatGPT. Quota windows and reset times stay visible, and Codex sign-ins can refresh automatically.",
+          "添加 API Key，或用 ChatGPT 登录 Codex。额度窗口和重置时间一目了然，Codex 登录可以自动续期。",
         ),
         alt: localized(
-          "ViberMate Script library with message transform examples and syntax highlighted JavaScript",
-          "ViberMate 脚本库，展示消息变换示例与带语法高亮的 JavaScript",
+          "Upstream accounts in ViberMate, including a ChatGPT account with its quota",
+          "ViberMate 的上游账号列表，其中 ChatGPT 账号显示了额度",
         ),
-        width: 2400,
-        height: 1341,
-      },
-      {
-        src: "/images/vibermate/team-insights-2400.webp",
-        previewSrc: "/images/vibermate/team-insights-1280.webp",
-        title: localized(
-          "See usage from retained evidence",
-          "从保留证据看清团队使用情况",
-        ),
+      }),
+      screenshot("usage", 1340, {
+        eyebrow: localized("Measure", "算清用量"),
+        title: localized("Know the usage and the cost", "知道用了多少、花了多少"),
         body: localized(
-          "Review calls and protocol-declared tokens by runtime user without pretending partial evidence is billing data.",
-          "按运行时用户查看调用量与协议声明的 Token，并明确区分局部证据和计费数据。",
+          "Count requests, tokens and estimated cost by project, branch, model, account or person. Costs come from public prices and are marked as estimates, not a bill.",
+          "按项目、分支、模型、账号或人员统计请求数、Token 和估算费用。费用按公开价格估算，并明确标注不是账单。",
         ),
         alt: localized(
-          "ViberMate Team insights view with API call activity and token totals for one runtime user",
-          "ViberMate 团队洞察视图，显示一名运行时用户的 API 调用活动与 Token 汇总",
+          "The ViberMate usage overview with requests, tokens and estimated cost",
+          "ViberMate 使用概览，显示请求数、Token 与估算费用",
         ),
-        width: 2400,
-        height: 1341,
-      },
+      }),
+      screenshot("scripts", 1340, {
+        eyebrow: localized("Customize", "定制"),
+        title: localized("Small scripts for special cases", "特殊需求用小脚本解决"),
+        body: localized(
+          "Start from built-in examples that hide personal details, block leaked secrets or set a reply language, and test them before you turn them on.",
+          "从内置示例开始：隐藏个人信息、拦截泄露的密钥、设定回复语言，并在启用前先测试。",
+        ),
+        alt: localized(
+          "The ViberMate script library with built-in JavaScript examples",
+          "ViberMate 脚本库中的内置 JavaScript 示例",
+        ),
+      }),
     ],
   },
   {
