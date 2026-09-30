@@ -110,10 +110,10 @@ const productCatalog: readonly Product[] = [
       "给使用 Claude Code 或 Codex 的人",
     ),
     status: localized(
-      "macOS + Linux · v0.1.20",
-      "macOS + Linux · v0.1.20",
+      "macOS + Linux · v0.1.21",
+      "macOS + Linux · v0.1.21",
     ),
-    version: "0.1.20",
+    version: "0.1.21",
     headline: localized(
       "See and steer your coding agent.",
       "看清并掌控你的 AI 编程助手。",
@@ -159,8 +159,8 @@ const productCatalog: readonly Product[] = [
             "打开工作台",
           ),
           body: localized(
-            "Read each conversation, switch accounts, approve new connections, and check usage and cost, in the App or a browser.",
-            "在 App 或浏览器里查看每段对话、切换账号、审批新的连接、查看用量与费用。",
+            "Read user and Agent messages first; open tools or system context beside a message. Check compact Token and estimated cost details, switch accounts, and approve new connections, in the App or a browser.",
+            "在 App 或浏览器里先读用户和 Agent 正文，再从消息旁查看工具或系统上下文；用小字查看 Token 与估算费用，还能切换账号、审批新的连接。",
           ),
         },
       ],
@@ -243,7 +243,7 @@ const productCatalog: readonly Product[] = [
       },
     ],
     repository: "https://github.com/vibe-agi/vibermate",
-    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.20",
+    release: "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.21",
     featuresLabel: localized("Good to know", "值得了解"),
     features: [
       {
