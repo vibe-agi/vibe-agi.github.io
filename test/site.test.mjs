@@ -162,7 +162,7 @@ test("search engines receive truthful site, software, and breadcrumb data", asyn
   assert.deepEqual(homeTypes, new Set(["Organization", "WebSite"]));
 
   for (const [relativePath, name, version, screenshotCount] of [
-    ["products/vibermate/index.html", "ViberMate", "0.1.21", 6],
+    ["products/vibermate/index.html", "ViberMate", "0.1.22", 6],
     ["products/hideout/index.html", "Hideout", "0.1.0-alpha.3", 0],
   ]) {
     const html = await read(relativePath);
@@ -291,7 +291,7 @@ test("product pages expose the supported install and release paths", async () =>
     [
       "products/vibermate/index.html",
       "brew install --cask vibe-agi/tap/vibermate",
-      "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.21",
+      "https://github.com/vibe-agi/vibermate/releases/tag/v0.1.22",
     ],
     [
       "products/hideout/index.html",
@@ -313,8 +313,8 @@ test("ViberMate release guidance stays current in both languages", async () => {
     "zh/products/vibermate/index.html",
   ]) {
     const html = await read(relativePath);
-    assert.ok(html.includes("v0.1.21"), relativePath);
-    assert.ok(html.includes("https://github.com/vibe-agi/vibermate/releases/tag/v0.1.21"), relativePath);
+    assert.ok(html.includes("v0.1.22"), relativePath);
+    assert.ok(html.includes("https://github.com/vibe-agi/vibermate/releases/tag/v0.1.22"), relativePath);
     assert.ok(html.includes("vibermate run -- claude"), relativePath);
     assert.ok(html.includes("./vibermated server recovery-key"), relativePath);
     assert.ok(html.includes("http://127.0.0.1:9666"), relativePath);
